@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Contracts;
+namespace Lava83\DddFoundation\Domain\Shared\Contracts;
 
 use Illuminate\Support\Collection;
 

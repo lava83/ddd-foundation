@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Events;
+namespace Lava83\DddFoundation\Domain\Shared\Events;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Contracts\DomainEvent;
-use Lava83\DddFoundation\ValueObjects\Id;
+use Lava83\DddFoundation\Domain\Shared\Contracts\DomainEvent;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
 
 abstract class BaseDomainEvent implements DomainEvent
 {

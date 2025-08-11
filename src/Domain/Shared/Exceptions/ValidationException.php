@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Exceptions;
+namespace Lava83\DddFoundation\Domain\Shared\Exceptions;
 
 use Throwable;
 

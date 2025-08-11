@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Contracts;
+namespace Lava83\DddFoundation\Domain\Shared\Contracts;
 
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Entities\BaseAggregateRoot;
-use Lava83\DddFoundation\ValueObjects\Id;
+use Lava83\DddFoundation\Domain\Shared\Entities\BaseAggregateRoot;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
 
 interface Repository
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Entities;
+namespace Lava83\DddFoundation\Domain\Shared\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;

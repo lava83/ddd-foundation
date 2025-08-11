@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\ValueObjects;
+namespace Lava83\DddFoundation\Domain\Shared\ValueObjects;
 
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Exception;
 use JsonSerializable;
-use Lava83\DddFoundation\Exceptions\ValidationException;
+use Lava83\DddFoundation\Domain\Shared\Exceptions\ValidationException;
 
 final class DateRange implements JsonSerializable
 {
