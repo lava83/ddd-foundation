@@ -1,0 +1,272 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lava83\DddFoundation\ValueObjects;
+
+use DateTimeInterface;
+use JsonSerializable;
+use Lava83\DddFoundation\Exceptions\ValidationException;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+
+class Id implements JsonSerializable
+{
+    private UuidInterface $value;
+
+    protected string $prefix = '';
+
+    final public function __construct(string $value)
+    {
+        if (blank($this->prefix)) {
+            throw new ValidationException('Prefix must be set in the child class');
+        }
+
+        $this->validate($value);
+        $this->value = Uuid::fromString($value);
+    }
+
+    public static function generate(): static
+    {
+        return new static(Uuid::uuid7(now())->toString());
+    }
+
+    public static function fromString(string $value): static
+    {
+        return new static($value);
+    }
+
+    public static function fromUuid(UuidInterface $uuid): static
+    {
+        return new static($uuid->toString());
+    }
+
+    public static function fromBytes(string $bytes): static
+    {
+        return new static(Uuid::fromBytes($bytes)->toString());
+    }
+
+    public static function fromPrefixed(string $prefixedId): static
+    {
+        $value = str($prefixedId);
+
+        if ($value->contains('_') === false) {
+            throw new ValidationException('Prefixed ID must contain underscore separator');
+        }
+
+        try {
+            return new static($value->afterLast('_')->toString());
+        } catch (ValidationException) {
+            throw new ValidationException('Invalid prefixed ID format');
+        }
+    }
+
+    public static function extractPrefix(string $prefixedId): string
+    {
+        $value = str($prefixedId);
+
+        if ($value->contains('_') === false) {
+            throw new ValidationException('Prefixed ID must contain underscore separator');
+        }
+
+        return $value->beforeLast('_')->toString();
+    }
+
+    public static function validatePrefix(string $prefixedId, string $expectedPrefix): bool
+    {
+        try {
+            return self::extractPrefix($prefixedId) === $expectedPrefix;
+        } catch (ValidationException) {
+            return false;
+        }
+    }
+
+    public static function createMany(int $count): array
+    {
+        $ids = [];
+        for ($i = 0; $i < $count; $i++) {
+            $ids[] = static::generate();
+        }
+
+        return $ids;
+    }
+
+    public static function fromArray(array $values): array
+    {
+        return array_map(fn (string $value) => new static($value), $values);
+    }
+
+    public static function toStringArray(array $ids): array
+    {
+        return array_map(fn (Id $id) => $id->value(), $ids);
+    }
+
+    public function value(): string
+    {
+        return $this->value->toString();
+    }
+
+    public function uuid(): UuidInterface
+    {
+        return $this->value;
+    }
+
+    public function bytes(): string
+    {
+        return $this->value->getBytes();
+    }
+
+    public function hex(): string
+    {
+        return $this->value->getHex()->toString();
+    }
+
+    public function equals(Id $other): bool
+    {
+        return $this->value->equals($other->value);
+    }
+
+    public function toString(): string
+    {
+        return $this->value();
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    public function jsonSerialize(): string
+    {
+        return $this->value();
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->value(),
+            'hex' => $this->hex(),
+        ];
+    }
+
+    /**
+     * Compare IDs for sorting purposes
+     */
+    public function compareTo(Id $other): int
+    {
+        return $this->uuid()->compareTo($other->uuid());
+    }
+
+    /**
+     * Check if this ID comes before another ID (useful for ordering)
+     */
+    public function isBefore(Id $other): bool
+    {
+        return $this->compareTo($other) < 0;
+    }
+
+    /**
+     * Check if this ID comes after another ID (useful for ordering)
+     */
+    public function isAfter(Id $other): bool
+    {
+        return $this->compareTo($other) > 0;
+    }
+
+    /**
+     * Get the timestamp component from UUID v1 (if applicable)
+     * Returns null for UUID v4 and higher
+     */
+    public function timestamp(): ?DateTimeInterface
+    {
+        return $this->value->getDateTime();
+    }
+
+    /**
+     * Get UUID version
+     */
+    public function version(): int
+    {
+        return $this->value->getVersion();
+    }
+
+    /**
+     * Check if this is a nil/empty UUID
+     */
+    public function isNil(): bool
+    {
+        return (string) $this->value === Uuid::NIL;
+    }
+
+    /**
+     * Get a shortened version of the ID (first 8 characters)
+     * Useful for logging or display purposes
+     */
+    public function shortId(): string
+    {
+        return substr($this->value(), 0, 8);
+    }
+
+    /**
+     * Create a prefixed version for different entity types
+     * Example: emp_550e8400-e29b-41d4-a716-446655440000
+     */
+    public function withPrefix(): string
+    {
+        return sprintf('%s_%s', $this->prefix, $this->value());
+    }
+
+    public function referenceNumber(): string
+    {
+        $hex = $this->hex();
+        $numbers = '';
+
+        for ($i = 0; $i < 8; $i++) {
+            $numbers .= hexdec($hex[$i]) % 10;
+        }
+
+        return str($this->prefix)
+            ->append('-')
+            ->append(str($numbers)->substr(0, 4))
+            ->append('-')
+            ->append(str($numbers)->substr(4, 4))
+            ->upper()
+            ->toString();
+    }
+
+    public function logId(): string
+    {
+        return str($this->shortId())
+            ->substr(0, 4)
+            ->append('****')
+            ->toString();
+    }
+
+    public function displayId(): string
+    {
+        return str($this->withPrefix())
+            ->upper()
+            ->replace('_', '-')
+            ->toString();
+    }
+
+    private function validate(string $value): void
+    {
+        if (empty(trim($value))) {
+            throw new ValidationException('Id cannot be empty');
+        }
+
+        if (! Uuid::isValid($value)) {
+            throw new ValidationException('Invalid UUID format: '.$value);
+        }
+
+        $uuid = Uuid::fromString($value);
+
+        if (
+            $value !== Uuid::NIL
+            && $uuid->getVersion() < 4
+        ) {
+            throw new ValidationException('Only UUID version 4 or higher are allowed, got version: '.$uuid->getVersion());
+        }
+    }
+}

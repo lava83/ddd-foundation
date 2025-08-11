@@ -1,0 +1,31 @@
+{
+    "name": "lava83/ddd-foundation",
+    "description": "A robust Domain-Driven Design foundation package for Laravel applications, providing essential building blocks including aggregate roots, domain events, value objects, and shared contracts for clean domain modeling.",
+    "type": "library",
+    "require-dev": {
+        "laravel/pint": "^1.24",
+        "larastan/larastan": "^3.6",
+        "pestphp/pest": "^3.8",
+        "pestphp/pest-plugin-laravel": "^3.2"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lava83\\DddFoundation\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Stefan Riedel",
+            "email": "stefan.riedel.bo@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^12.22"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
