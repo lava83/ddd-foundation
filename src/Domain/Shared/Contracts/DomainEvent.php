@@ -27,6 +27,8 @@ interface DomainEvent
 
     /**
      * Get the event payload/data
+     *
+     * @return Collection<string, mixed>
      */
     public function eventData(): Collection;
 
@@ -34,4 +36,11 @@ interface DomainEvent
      * Get event version for serialization compatibility
      */
     public function eventVersion(): int;
+
+    /**
+     * Convert the event to an array representation
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array;
 }

@@ -37,6 +37,9 @@ final class DateRange implements JsonSerializable
         }
     }
 
+    /**
+     * @param  array<string, string>  $dateRange
+     */
     public static function fromArray(array $dateRange): self
     {
         if (! isset($dateRange['start_date']) || ! isset($dateRange['end_date'])) {
@@ -178,6 +181,9 @@ final class DateRange implements JsonSerializable
         );
     }
 
+    /**
+     * @return array<int, DateRange>
+     */
     public function split(CarbonInterface $splitDate): array
     {
         $split = CarbonImmutable::instance($splitDate);
@@ -224,6 +230,12 @@ final class DateRange implements JsonSerializable
         return $this->startDate->eq($other->startDate) && $this->endDate->eq($other->endDate);
     }
 
+    /**
+     * Convert to array representation
+     * Useful for serialization or API responses
+     *
+     * @return array<string, string|float|int>
+     */
     public function toArray(): array
     {
         return [
@@ -234,6 +246,9 @@ final class DateRange implements JsonSerializable
         ];
     }
 
+    /**
+     * @return array<string, string|float|int>
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
@@ -258,6 +273,9 @@ final class DateRange implements JsonSerializable
         );
     }
 
+    /**
+     * @return array<string>
+     */
     public function allDates(): array
     {
         $dates = [];
@@ -271,6 +289,9 @@ final class DateRange implements JsonSerializable
         return $dates;
     }
 
+    /**
+     * @return array<string>
+     */
     public function businessDates(): array
     {
         $dates = [];

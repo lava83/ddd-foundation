@@ -13,7 +13,7 @@ interface Repository
     /**
      * Get next available ID for this entity type
      */
-    public function nextId();
+    public function nextId(): Id;
 
     /**
      * Check if an aggregate exists by ID
@@ -28,7 +28,7 @@ interface Repository
     /**
      * Get all aggregates
      *
-     * @return Collection<BaseAggregateRoot>
+     * @return Collection<int, BaseAggregateRoot>
      */
     public function all(): Collection;
 

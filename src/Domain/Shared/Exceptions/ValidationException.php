@@ -13,6 +13,9 @@ class ValidationException extends \Exception
         parent::__construct($message, $code, $previous);
     }
 
+    /**
+     * @param  array<string>  $errors
+     */
     public static function fromArray(array $errors): self
     {
         $message = implode(', ', $errors);

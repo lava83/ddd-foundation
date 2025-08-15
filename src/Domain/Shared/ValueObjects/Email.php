@@ -218,6 +218,9 @@ class Email implements JsonSerializable
         return null;
     }
 
+    /**
+     * @return array<string, bool|Stringable>
+     */
     public function toArray(): array
     {
         return [

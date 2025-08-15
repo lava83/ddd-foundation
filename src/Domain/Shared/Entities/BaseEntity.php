@@ -6,6 +6,7 @@ namespace Lava83\DddFoundation\Domain\Shared\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
@@ -23,7 +24,7 @@ abstract class BaseEntity
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
      */
-    abstract public function id();
+    abstract public function id(): Id;
 
     /**
      * Compare entities by ID for equality
@@ -72,24 +73,20 @@ abstract class BaseEntity
     /**
      * Hydration from persistence layer
      * Called when reconstituting from database
+     *
+     * @param  array{created_at: string, updated_at: ?string, version: int}  $data
      */
     public function hydrate(array $data): void
     {
-        if (isset($data['created_at'])) {
-            $this->createdAt = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $data['created_at']);
-        }
-
-        if (isset($data['updated_at'])) {
-            $this->updatedAt = CarbonImmutable::createFromFormat('Y-m-d H:i:s', (string) $data['updated_at']);
-        }
-
-        if (isset($data['version'])) {
-            $this->version = (int) $data['version'];
-        }
+        $this->createdAt = new CarbonImmutable((string) $data['created_at']);
+        $this->updatedAt = isset($data['updated_at']) ? new CarbonImmutable((string) $data['updated_at']) : null;
+        $this->version = (int) $data['version'];
     }
 
     /**
      * Convert entity to array for persistence
+     *
+     * @return array<string, int|string|null>
      */
     public function toArray(): array
     {
@@ -176,12 +173,14 @@ abstract class BaseEntity
     /**
      * Validate entity state
      * Override in child classes for specific validation
+     *
+     * @return array<string>
      */
     public function validate(): array
     {
         $errors = [];
 
-        if (! $this->id()) {
+        if (! $this->id()->value()) {
             $errors[] = 'Entity must have an ID';
         }
 
@@ -198,6 +197,8 @@ abstract class BaseEntity
 
     /**
      * Get entity metadata for auditing
+     *
+     * @return array<string, mixed>
      */
     public function metadata(): array
     {

@@ -10,6 +10,8 @@ interface AggregateRoot
 {
     /**
      * Get all uncommitted domain events
+     *
+     * @return Collection<int, DomainEvent>
      */
     public function uncommittedEvents(): Collection;
 

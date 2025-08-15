@@ -62,11 +62,17 @@ class Money implements JsonSerializable
         };
     }
 
+    /**
+     * @return array<string, float|string>
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
+    /**
+     * @return array<string, float|string>
+     */
     public function toArray(): array
     {
         return [

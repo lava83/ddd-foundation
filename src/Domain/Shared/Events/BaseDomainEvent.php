@@ -16,6 +16,9 @@ abstract class BaseDomainEvent implements DomainEvent
 
     private int $eventVersion;
 
+    /**
+     * @param  Collection<string, mixed>  $eventData
+     */
     public function __construct(
         private Id $aggregateId,
         private Collection $eventData = new Collection,
@@ -35,6 +38,9 @@ abstract class BaseDomainEvent implements DomainEvent
         return $this->occurredOn;
     }
 
+    /**
+     * @return Collection<string, mixed>
+     */
     public function eventData(): Collection
     {
         return $this->eventData;

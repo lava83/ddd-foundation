@@ -4,9 +4,10 @@
     "type": "library",
     "require-dev": {
         "laravel/pint": "^1.24",
-        "larastan/larastan": "^3.6",
         "pestphp/pest": "^3.8",
-        "pestphp/pest-plugin-laravel": "^3.2"
+        "pestphp/pest-plugin-laravel": "^3.2",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-deprecation-rules": "^2.0"
     },
     "license": "MIT",
     "autoload": {
@@ -27,5 +28,16 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "stan": [
+            "./vendor/bin/phpstan analyse --memory-limit=5G --configuration=phpstan.neon --no-interaction"
+        ],
+        "pint": [
+            "./vendor/bin/pint --test"
+        ],
+        "pint-fix": [
+            "./vendor/bin/pint"
+        ]
     }
 }

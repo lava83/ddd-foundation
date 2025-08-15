@@ -15,6 +15,9 @@ use Lava83\DddFoundation\Domain\Shared\Contracts\DomainEvent;
  */
 abstract class BaseAggregateRoot extends BaseEntity implements AggregateRoot
 {
+    /**
+     * @param  Collection<int, DomainEvent>  $domainEvents
+     */
     public function __construct(
         private Collection $domainEvents = new Collection,
     ) {
@@ -29,6 +32,9 @@ abstract class BaseAggregateRoot extends BaseEntity implements AggregateRoot
         $this->domainEvents[] = $event;
     }
 
+    /**
+     * @return Collection<int, DomainEvent>
+     */
     public function uncommittedEvents(): Collection
     {
         // Return a copy of the events to prevent external modification
@@ -105,6 +111,8 @@ abstract class BaseAggregateRoot extends BaseEntity implements AggregateRoot
 
     /**
      * Get summary of uncommitted events for debugging
+     *
+     * @return Collection<int, array<string, string>>
      */
     public function eventSummary(): Collection
     {

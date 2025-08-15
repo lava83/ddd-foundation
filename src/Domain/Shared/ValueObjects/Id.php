@@ -81,6 +81,9 @@ class Id implements JsonSerializable
         }
     }
 
+    /**
+     * @return array<Id>
+     */
     public static function createMany(int $count): array
     {
         $ids = [];
@@ -91,11 +94,19 @@ class Id implements JsonSerializable
         return $ids;
     }
 
+    /**
+     * @param  array<string>  $values
+     * @return array<static>
+     */
     public static function fromArray(array $values): array
     {
         return array_map(fn (string $value) => new static($value), $values);
     }
 
+    /**
+     * @param  array<Id>  $ids
+     * @return array<string>
+     */
     public static function toStringArray(array $ids): array
     {
         return array_map(fn (Id $id) => $id->value(), $ids);
@@ -141,6 +152,9 @@ class Id implements JsonSerializable
         return $this->value();
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toArray(): array
     {
         return [
@@ -185,7 +199,7 @@ class Id implements JsonSerializable
     /**
      * Get UUID version
      */
-    public function version(): int
+    public function version(): ?int
     {
         return $this->value->getVersion();
     }
@@ -227,9 +241,9 @@ class Id implements JsonSerializable
 
         return str($this->prefix)
             ->append('-')
-            ->append(str($numbers)->substr(0, 4))
+            ->append((string) str($numbers)->substr(0, 4))
             ->append('-')
-            ->append(str($numbers)->substr(4, 4))
+            ->append((string) str($numbers)->substr(4, 4))
             ->upper()
             ->toString();
     }
