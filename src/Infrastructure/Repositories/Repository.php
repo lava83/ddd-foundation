@@ -13,7 +13,7 @@ use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
 use Lava83\DddFoundation\Infrastructure\Models\BaseModel;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 
-class Repository
+abstract class Repository
 {
     protected function saveEntity(BaseAggregateRoot $entity): Model
     {
