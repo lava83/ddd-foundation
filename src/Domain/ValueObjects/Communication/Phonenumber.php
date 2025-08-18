@@ -84,7 +84,7 @@ class Phonenumber implements JsonSerializable
         $number = $this->numberProto((string) $rawNumber);
 
         $this->countryAreaCode = CountryAreaCode::from(
-            (string) str('+')->append($number->getCountryCode())
+            (string) str('+')->append((string) $number->getCountryCode())
         );
 
         $this->localAreaCode = str($this->phoneNumberUtil()->formatNationalNumberWithCarrierCode($number, null))

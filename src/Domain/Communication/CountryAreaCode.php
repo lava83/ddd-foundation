@@ -37,7 +37,6 @@ enum CountryAreaCode: string
             'IT' => self::IT,
             'ES' => self::ES,
             'UK' => self::UK,
-            'CA' => self::CA,
             'AU' => self::AU,
             'PL' => self::PL,
             'BE' => self::BE,
@@ -55,6 +54,9 @@ enum CountryAreaCode: string
         };
     }
 
+    /**
+     * @return array<string>
+     */
     public static function values(): array
     {
         return array_map(fn (self $code) => $code->value, self::cases());

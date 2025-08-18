@@ -6,6 +6,7 @@ namespace Lava83\DddFoundation\Domain\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
@@ -22,6 +23,8 @@ abstract class Entity
     /**
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
+     *
+     * @return Id
      */
     abstract public function id();
 

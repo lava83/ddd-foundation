@@ -68,11 +68,11 @@ class Link
         $this->path = str($parts['path'] ?? '');
         $this->query = str($parts['query'] ?? '');
 
-        $this->value = str($this->scheme)
+        $this->value = $this->scheme
             ->append('://')
-            ->append($this->host)
-            ->append($this->path)
-            ->when(filled($this->query), fn (Stringable $s) => $s->append('?')->append($this->query));
+            ->append((string) $this->host)
+            ->append((string) $this->path)
+            ->when(filled($this->query), fn (Stringable $s) => $s->append('?')->append((string) $this->query));
     }
 
     private function validate(string $url): void

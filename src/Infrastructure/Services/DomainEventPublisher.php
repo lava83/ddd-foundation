@@ -6,7 +6,7 @@ namespace Lava83\DddFoundation\Infrastructure\Services;
 
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\Shared\Contracts\DomainEvent;
+use Lava83\DddFoundation\Domain\Contracts\DomainEvent;
 
 class DomainEventPublisher
 {
