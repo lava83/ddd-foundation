@@ -24,7 +24,6 @@ class Model extends EloquentModel
     public function casts(): array
     {
         return [
-            'id' => 'uuid',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'version' => 'integer',
