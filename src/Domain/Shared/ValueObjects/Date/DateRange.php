@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects;
+namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Date;
 
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;

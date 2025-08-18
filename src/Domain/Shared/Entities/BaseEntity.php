@@ -6,7 +6,7 @@ namespace Lava83\DddFoundation\Domain\Shared\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity\Id;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)

@@ -6,7 +6,7 @@ namespace Lava83\DddFoundation\Domain\Shared\Contracts;
 
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Shared\Entities\BaseAggregateRoot;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity\Id;
 
 interface Repository
 {

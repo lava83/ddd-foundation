@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects;
+namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Communication;
 
 use Closure;
 use Illuminate\Support\Facades\Validator;

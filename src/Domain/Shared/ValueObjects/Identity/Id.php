@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects;
+namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity;
 
 use DateTimeInterface;
 use JsonSerializable;

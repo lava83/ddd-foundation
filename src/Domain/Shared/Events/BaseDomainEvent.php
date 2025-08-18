@@ -8,7 +8,7 @@ use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Shared\Contracts\DomainEvent;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
+use Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity\Id;
 
 abstract class BaseDomainEvent implements DomainEvent
 {
