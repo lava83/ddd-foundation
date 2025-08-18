@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Communication;
+namespace Lava83\DddFoundation\Domain\ValueObjects\Communication;
 
 use Closure;
 use Illuminate\Support\Stringable;
 use JsonSerializable;
-use Lava83\DddFoundation\Domain\Shared\Enums\Communication\CountryAreaCode;
-use Lava83\DddFoundation\Domain\Shared\Exceptions\ValidationException;
+use Lava83\DddFoundation\Domain\Enums\Communication\CountryAreaCode;
+use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumber as LibphonenumberPhoneNumber;
 use libphonenumber\PhoneNumberUtil;

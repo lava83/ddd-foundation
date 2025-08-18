@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\Enums\Communication;
+namespace Lava83\DddFoundation\Domain\Enums\Communication;
 
 use InvalidArgumentException;
 

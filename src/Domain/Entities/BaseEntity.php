@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\Entities;
+namespace Lava83\DddFoundation\Domain\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)

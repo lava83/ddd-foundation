@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\Entities;
+namespace Lava83\DddFoundation\Domain\Entities;
 
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\Shared\Contracts\AggregateRoot;
-use Lava83\DddFoundation\Domain\Shared\Contracts\DomainEvent;
+use Lava83\DddFoundation\Domain\Contracts\AggregateRoot;
+use Lava83\DddFoundation\Domain\Contracts\DomainEvent;
 
 /**
  * Base class for Aggregate Root entities

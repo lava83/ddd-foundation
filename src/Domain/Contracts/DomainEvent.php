@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\Contracts;
+namespace Lava83\DddFoundation\Domain\Contracts;
 
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 
 interface DomainEvent
 {

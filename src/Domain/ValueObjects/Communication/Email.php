@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Communication;
+namespace Lava83\DddFoundation\Domain\ValueObjects\Communication;
 
 use Closure;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Stringable;
 use JsonSerializable;
-use Lava83\DddFoundation\Domain\Shared\Exceptions\ValidationException;
+use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
 class Email implements JsonSerializable
 {

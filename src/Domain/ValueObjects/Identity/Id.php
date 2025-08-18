@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Identity;
+namespace Lava83\DddFoundation\Domain\ValueObjects\Identity;
 
 use DateTimeInterface;
 use JsonSerializable;
-use Lava83\DddFoundation\Domain\Shared\Exceptions\ValidationException;
+use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 

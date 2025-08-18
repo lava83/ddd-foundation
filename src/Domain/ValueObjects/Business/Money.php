@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Business;
+namespace Lava83\DddFoundation\Domain\ValueObjects\Business;
 
 use InvalidArgumentException;
 use JsonSerializable;

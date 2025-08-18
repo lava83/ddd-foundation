@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\ValueObjects\Communication;
+namespace Lava83\DddFoundation\Domain\ValueObjects\Communication;
 
 use Illuminate\Support\Stringable;
-use Lava83\DddFoundation\Domain\Shared\Exceptions\ValidationException;
+use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
 class Link
 {

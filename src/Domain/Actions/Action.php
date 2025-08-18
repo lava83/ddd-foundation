@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lava83\DddFoundation\Domain\Shared\Actions;
+namespace Lava83\DddFoundation\Domain\Actions;
 
 use Mockery;
 use Mockery\ExpectationInterface;
