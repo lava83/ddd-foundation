@@ -6,13 +6,12 @@ namespace Lava83\DddFoundation\Domain\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
-use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
  * Contains common entity functionality without domain event handling
  */
-abstract class BaseEntity
+abstract class Entity
 {
     public function __construct(
         protected CarbonImmutable $createdAt = new CarbonImmutable,
@@ -24,12 +23,12 @@ abstract class BaseEntity
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
      */
-    abstract public function id(): Id;
+    abstract public function id();
 
     /**
      * Compare entities by ID for equality
      */
-    public function equals(BaseEntity $other): bool
+    public function equals(Entity $other): bool
     {
         if (get_class($this) !== get_class($other)) {
             return false;

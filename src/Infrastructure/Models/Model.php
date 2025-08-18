@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Carbon;
 use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
 
@@ -13,11 +13,11 @@ use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
  * @property-read Carbon $created_at
  * @property-read ?Carbon $updated_at
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|BaseModel query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Model newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Model newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Model query()
  */
-class BaseModel extends Model
+class Model extends EloquentModel
 {
     use HasUuids;
 

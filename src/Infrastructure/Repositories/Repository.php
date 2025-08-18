@@ -10,7 +10,7 @@ use Lava83\DddFoundation\Domain\Shared\Entities\BaseEntity;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
-use Lava83\DddFoundation\Infrastructure\Models\BaseModel;
+use Lava83\DddFoundation\Infrastructure\Models\Model;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 
 abstract class Repository
@@ -41,7 +41,7 @@ abstract class Repository
         }
     }
 
-    protected function handleOptimisticLocking(BaseModel $model, BaseEntity $entity): void
+    protected function handleOptimisticLocking(Model $model, BaseEntity $entity): void
     {
         if ($model->version !== $entity->version()) {
             throw new ConcurrencyException(
@@ -55,7 +55,7 @@ abstract class Repository
         $model->version = $entity->version() + 1;
     }
 
-    protected function syncEntityFromModel(BaseEntity $entity, BaseModel $model): void
+    protected function syncEntityFromModel(BaseEntity $entity, Model $model): void
     {
         // Update entity with final database values
         $entity->hydrate([

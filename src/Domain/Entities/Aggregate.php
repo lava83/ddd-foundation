@@ -13,7 +13,7 @@ use Lava83\DddFoundation\Domain\Contracts\DomainEvent;
  * Base class for Aggregate Root entities
  * Extends BaseEntity and adds domain event handling
  */
-abstract class BaseAggregateRoot extends BaseEntity implements AggregateRoot
+abstract class Aggregate extends Entity implements AggregateRoot
 {
     /**
      * @param  Collection<int, DomainEvent>  $domainEvents

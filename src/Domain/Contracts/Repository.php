@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Lava83\DddFoundation\Domain\Contracts;
 
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\Entities\BaseAggregateRoot;
+use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 
 interface Repository
@@ -28,7 +28,7 @@ interface Repository
     /**
      * Get all aggregates
      *
-     * @return Collection<int, BaseAggregateRoot>
+     * @return Collection<int, Aggregate>
      */
     public function all(): Collection;
 
