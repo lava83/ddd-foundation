@@ -27,6 +27,7 @@ abstract class Repository
         }
 
         $this->dispatchUncommittedEvents($entity);
+
         $this->syncEntityFromModel($entity, $model);
 
         return $model;
@@ -45,13 +46,10 @@ abstract class Repository
         if ($model->version !== $entity->version()) {
             throw new ConcurrencyException(
                 "Employee {$entity->id()->value()} was modified by another process. ".
-                "Expected version: {$entity->version()}, ".
-                "Actual version: {$model->version}"
+                    "Expected version: {$entity->version()}, ".
+                    "Actual version: {$model->version}"
             );
         }
-
-        // Increment version for the update
-        $model->version = $entity->version() + 1;
     }
 
     protected function syncEntityFromModel(Entity $entity, Model $model): void

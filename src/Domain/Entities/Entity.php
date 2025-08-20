@@ -56,6 +56,7 @@ abstract class Entity
     protected function touch(): void
     {
         $this->updatedAt = CarbonImmutable::now();
+
         $this->version++;
     }
 

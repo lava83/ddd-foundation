@@ -102,7 +102,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
      */
     protected function updateAggregateRoot(?DomainEvent $event = null): void
     {
-        $this->updateEntity(); // Update timestamps and version
+        $this->updateEntity();
 
         if ($event) {
             $this->recordEvent($event);
