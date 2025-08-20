@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Domain\Exceptions;
 
+use Exception;
 use Throwable;
 
-class ValidationException extends \Exception
+class ValidationException extends Exception
 {
     public function __construct(string $message = 'Validation failed', int $code = 422, ?Throwable $previous = null)
     {
