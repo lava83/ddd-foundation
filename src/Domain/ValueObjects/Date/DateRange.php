@@ -25,7 +25,7 @@ final class DateRange implements JsonSerializable
         $this->validate();
     }
 
-    public static function fromString(string $startDate, string $endDate): self
+    public static function fromString(string $startDate, string $endDate): static
     {
         try {
             return new self(
@@ -40,55 +40,55 @@ final class DateRange implements JsonSerializable
     /**
      * @param  array<string, string>  $dateRange
      */
-    public static function fromArray(array $dateRange): self
+    public static function fromArray(array $dateRange): static
     {
         if (! isset($dateRange['start_date']) || ! isset($dateRange['end_date'])) {
             throw new ValidationException('Date range must contain start_date and end_date');
         }
 
-        return self::fromString($dateRange['start_date'], $dateRange['end_date']);
+        return static::fromString($dateRange['start_date'], $dateRange['end_date']);
     }
 
-    public static function singleDay(CarbonInterface $date): self
+    public static function singleDay(CarbonInterface $date): static
     {
-        return new self($date, $date);
+        return new static($date, $date);
     }
 
-    public static function currentWeek(): self
+    public static function currentWeek(): static
     {
         $now = CarbonImmutable::now();
 
-        return new self(
+        return new static(
             $now->startOfWeek(Carbon::MONDAY),
             $now->endOfWeek(Carbon::SUNDAY)
         );
     }
 
-    public static function currentMonth(): self
+    public static function currentMonth(): static
     {
         $now = CarbonImmutable::now();
 
-        return new self(
+        return new static(
             $now->startOfMonth(),
             $now->endOfMonth()
         );
     }
 
-    public static function currentYear(): self
+    public static function currentYear(): static
     {
         $now = CarbonImmutable::now();
 
-        return new self(
+        return new static(
             $now->startOfYear(),
             $now->endOfYear()
         );
     }
 
-    public static function lastNDays(int $days): self
+    public static function lastNDays(int $days): static
     {
         $now = CarbonImmutable::now();
 
-        return new self(
+        return new static(
             $now->subDays($days - 1),
             $now
         );
@@ -154,7 +154,7 @@ final class DateRange implements JsonSerializable
     public function touches(DateRange $other): bool
     {
         return $this->endDate->addDay()->startOfDay()->eq($other->startDate->startOfDay()) ||
-               $this->startDate->startOfDay()->eq($other->endDate->addDay()->startOfDay());
+            $this->startDate->startOfDay()->eq($other->endDate->addDay()->startOfDay());
     }
 
     public function merge(DateRange $other): DateRange
@@ -163,7 +163,7 @@ final class DateRange implements JsonSerializable
             throw new ValidationException('Cannot merge non-overlapping and non-touching date ranges');
         }
 
-        return new self(
+        return new static(
             $this->startDate->min($other->startDate),
             $this->endDate->max($other->endDate)
         );
@@ -175,7 +175,7 @@ final class DateRange implements JsonSerializable
             return null;
         }
 
-        return new self(
+        return new static(
             $this->startDate->max($other->startDate),
             $this->endDate->min($other->endDate)
         );
@@ -197,14 +197,14 @@ final class DateRange implements JsonSerializable
         }
 
         return [
-            new self($this->startDate, $split->subDay()),
-            new self($split, $this->endDate),
+            new static($this->startDate, $split->subDay()),
+            new static($split, $this->endDate),
         ];
     }
 
     public function extend(int $daysBefore = 0, int $daysAfter = 0): DateRange
     {
-        return new self(
+        return new static(
             $this->startDate->subDays($daysBefore),
             $this->endDate->addDays($daysAfter)
         );
@@ -212,17 +212,17 @@ final class DateRange implements JsonSerializable
 
     public function isCurrentWeek(): bool
     {
-        return $this->equals(self::currentWeek());
+        return $this->equals(static::currentWeek());
     }
 
     public function isCurrentMonth(): bool
     {
-        return $this->equals(self::currentMonth());
+        return $this->equals(static::currentMonth());
     }
 
     public function isCurrentYear(): bool
     {
-        return $this->equals(self::currentYear());
+        return $this->equals(static::currentYear());
     }
 
     public function equals(DateRange $other): bool

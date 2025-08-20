@@ -25,9 +25,9 @@ class Link
         $this->extractParts($link);
     }
 
-    public static function fromString(string $link): self
+    public static function fromString(string $link): static
     {
-        return new self($link);
+        return new static($link);
     }
 
     public function value(): Stringable

@@ -27,19 +27,19 @@ class Money implements JsonSerializable
         $this->currency = $currency;
     }
 
-    public static function euros(int $amount): self
+    public static function euros(int $amount): static
     {
-        return new self($amount / 100, 'EUR');
+        return new static($amount / 100, 'EUR');
     }
 
-    public static function dollars(int $amount): self
+    public static function dollars(int $amount): static
     {
-        return new self($amount / 100, 'USD');
+        return new static($amount / 100, 'USD');
     }
 
-    public static function pounds(int $amount): self
+    public static function pounds(int $amount): static
     {
-        return new self($amount / 100, 'GBP');
+        return new static($amount / 100, 'GBP');
     }
 
     public function amount(): float

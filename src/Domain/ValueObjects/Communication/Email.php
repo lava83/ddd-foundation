@@ -27,14 +27,14 @@ class Email implements JsonSerializable
         $this->parseEmailParts();
     }
 
-    public static function fromString(string $email): self
+    public static function fromString(string $email): static
     {
-        return new self($email);
+        return new static($email);
     }
 
-    public static function fromParts(string $localPart, string $domain): self
+    public static function fromParts(string $localPart, string $domain): static
     {
-        return new self($localPart.'@'.$domain);
+        return new static($localPart.'@'.$domain);
     }
 
     private function validate(Stringable $email): void
@@ -290,10 +290,29 @@ class Email implements JsonSerializable
     public function isRoleBasedEmail(): bool
     {
         $roleBasedPrefixes = [
-            'admin', 'administrator', 'info', 'contact', 'support', 'help',
-            'sales', 'marketing', 'hr', 'finance', 'accounting', 'billing',
-            'legal', 'compliance', 'security', 'it', 'tech', 'webmaster',
-            'postmaster', 'abuse', 'noreply', 'no-reply', 'donotreply',
+            'admin',
+            'administrator',
+            'info',
+            'contact',
+            'support',
+            'help',
+            'sales',
+            'marketing',
+            'hr',
+            'finance',
+            'accounting',
+            'billing',
+            'legal',
+            'compliance',
+            'security',
+            'it',
+            'tech',
+            'webmaster',
+            'postmaster',
+            'abuse',
+            'noreply',
+            'no-reply',
+            'donotreply',
         ];
 
         return $this->localPart->startsWith($roleBasedPrefixes);
