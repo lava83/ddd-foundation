@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Domain\ValueObjects\Identity;
 
+use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-class MongoObjectId
+class MongoObjectId implements JsonSerializable
 {
     private function __construct(
         private string $value
@@ -27,6 +28,21 @@ class MongoObjectId
     public function toString(): string
     {
         return $this->value;
+    }
+
+    public function __toString()
+    {
+        return $this->toString();
+    }
+
+    /**
+     * @return array{value: string}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'value' => $this->value,
+        ];
     }
 
     private function validate(string $value): void
