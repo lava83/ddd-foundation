@@ -6,7 +6,7 @@ namespace Lava83\DddFoundation\Domain\ValueObjects\Identity;
 
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-class TrelloObjectId
+class MongoObjectId
 {
     private function __construct(
         private string $value
