@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Contracts\DomainEvent as DomainEventContract;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
 
 abstract class DomainEvent implements DomainEventContract
 {
@@ -20,7 +21,7 @@ abstract class DomainEvent implements DomainEventContract
      * @param  Collection<string, mixed>  $eventData
      */
     public function __construct(
-        private Id $aggregateId,
+        private Id|MongoObjectId $aggregateId,
         private Collection $eventData = new Collection,
         int $eventVersion = 1
     ) {
