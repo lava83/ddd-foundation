@@ -6,7 +6,9 @@ namespace Lava83\DddFoundation\Domain\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
+use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
@@ -24,7 +26,7 @@ abstract class Entity
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
      *
-     * @return Id
+     * @return Id|MongoObjectId
      */
     abstract public function id();
 
@@ -214,4 +216,44 @@ abstract class Entity
             'age_seconds' => $this->ageInSeconds(),
         ];
     }
+
+    protected function collectChanges(array $newValues): Collection
+    {
+        $changes = collect();
+
+        foreach ($newValues as $property => $newValue) {
+            $currentValue = $this->$property;
+
+            if ($this->hasChanged($currentValue, $newValue)) {
+                $changes->put("old_{$property}", $currentValue);
+                $changes->put("new_{$property}", $newValue);
+            }
+        }
+
+        return $changes;
+    }
+
+    protected function hasChanged(mixed $current, mixed $new): bool
+    {
+        if (is_object($current) && method_exists($current, '__toString')) {
+            return (string) $current !== (string) $new;
+        }
+
+        if ($current === null || $new === null) {
+            return $current !== $new;
+        }
+
+        return $current !== $new;
+    }
+
+    protected function applyChangesByPropertyMap(array $propertyMap, Collection $changes): void
+    {
+        foreach ($propertyMap as $property => $setter) {
+            if ($changes->has("new_{$property}")) {
+                $setter($changes->get("new_{$property}"));
+            }
+        }
+    }
+
+    abstract protected function applyChanges(Collection $changes): void;
 }

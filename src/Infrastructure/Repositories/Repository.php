@@ -14,7 +14,7 @@ use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 
 abstract class Repository
 {
-    protected function saveEntity(Aggregate $entity): Model
+    protected function saveEntity(Entity|Aggregate $entity): Model
     {
         $model = app(EntityMapperResolver::class)->resolve($entity::class)->toModel($entity);
 
@@ -26,7 +26,9 @@ abstract class Repository
             throw new CantSaveModel('Failed to save entity');
         }
 
-        $this->dispatchUncommittedEvents($entity);
+        if ($entity instanceof Aggregate) {
+            $this->dispatchUncommittedEvents($entity);
+        }
 
         $this->syncEntityFromModel($entity, $model);
 
@@ -45,7 +47,7 @@ abstract class Repository
     {
         if ($model->version !== $entity->version()) {
             throw new ConcurrencyException(
-                "Employee {$entity->id()->value()} was modified by another process. ".
+                "Entity {$entity->id()->value()} was modified by another process. ".
                     "Expected version: {$entity->version()}, ".
                     "Actual version: {$model->version}"
             );
