@@ -10,6 +10,8 @@ use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
+// @todo this is only a base class without specification of UUID or whatever.
+
 class Id implements JsonSerializable
 {
     private UuidInterface $value;
