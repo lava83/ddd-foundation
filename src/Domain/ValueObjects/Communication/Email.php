@@ -241,6 +241,11 @@ class Email implements JsonSerializable
 
     public function __toString(): string
     {
+        return $this->toString();
+    }
+
+    public function toString(): string
+    {
         return (string) $this->value;
     }
 
