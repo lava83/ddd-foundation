@@ -11,10 +11,21 @@ use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
 use Lava83\DddFoundation\Infrastructure\Models\Model;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
+use LogicException;
 
 abstract class Repository
 {
-    public function __construct(private EntityMapperResolver $mapperResolver) {}
+    /**
+     * @property class-string<Aggregate> $aggregate
+     */
+    protected string $aggregate;
+
+    public function __construct(private EntityMapperResolver $mapperResolver)
+    {
+        if (! isset($this->aggregate) || ! is_subclass_of(app($this->aggregate), Aggregate::class)) {
+            throw new LogicException('Repository must define a valid aggregate class');
+        }
+    }
 
     protected function mapperResolver(): EntityMapperResolver
     {
