@@ -26,7 +26,7 @@ abstract class Repository
         $this->ensureAggregateIsSet();
     }
 
-    protected function mapperResolver(): EntityMapper
+    protected function entityMapper(): EntityMapper
     {
         return $this->mapperResolver->resolve($this->aggregate);
     }
