@@ -6,6 +6,7 @@ namespace Lava83\DddFoundation\Infrastructure\Repositories;
 
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\Entities\Entity;
+use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
@@ -22,14 +23,12 @@ abstract class Repository
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
-        if (! isset($this->aggregate) || ! is_subclass_of(app($this->aggregate), Aggregate::class)) {
-            throw new LogicException('Repository must define a valid aggregate class');
-        }
+        $this->ensureAggregateIsSet();
     }
 
-    protected function mapperResolver(): EntityMapperResolver
+    protected function mapperResolver(): EntityMapper
     {
-        return $this->mapperResolver;
+        return $this->mapperResolver->resolve($this->aggregate);
     }
 
     protected function saveEntity(Entity|Aggregate $entity): Model
@@ -80,5 +79,12 @@ abstract class Repository
             'updated_at' => $model->updated_at?->format('Y-m-d H:i:s'),
             'version' => $model->version,
         ]);
+    }
+
+    private function ensureAggregateIsSet()
+    {
+        if (! isset($this->aggregate) || ! is_subclass_of(app($this->aggregate), Aggregate::class)) {
+            throw new LogicException('Repository must define a valid aggregate class');
+        }
     }
 }
