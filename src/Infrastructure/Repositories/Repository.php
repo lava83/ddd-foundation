@@ -7,9 +7,9 @@ namespace Lava83\DddFoundation\Infrastructure\Repositories;
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\Entities\Entity;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
+use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapperResolver;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
-use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
 use Lava83\DddFoundation\Infrastructure\Models\Model;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 use LogicException;
@@ -23,7 +23,7 @@ abstract class Repository
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
-        $this->ensureAggregateIsSet();
+        // $this->ensureAggregateIsSet();
     }
 
     protected function entityMapper(): EntityMapper
