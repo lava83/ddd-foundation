@@ -14,9 +14,16 @@ use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 
 abstract class Repository
 {
+    public function __construct(private EntityMapperResolver $mapperResolver) {}
+
+    protected function mapperResolver(): EntityMapperResolver
+    {
+        return $this->mapperResolver;
+    }
+
     protected function saveEntity(Entity|Aggregate $entity): Model
     {
-        $model = app(EntityMapperResolver::class)->resolve($entity::class)->toModel($entity);
+        $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
 
         if ($model->exists) {
             $this->handleOptimisticLocking($model, $entity);
@@ -48,8 +55,8 @@ abstract class Repository
         if ($model->version !== $entity->version()) {
             throw new ConcurrencyException(
                 "Entity {$entity->id()->value()} was modified by another process. ".
-                    "Expected version: {$entity->version()}, ".
-                    "Actual version: {$model->version}"
+                "Expected version: {$entity->version()}, ".
+                "Actual version: {$model->version}"
             );
         }
     }
