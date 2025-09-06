@@ -17,9 +17,9 @@ use LogicException;
 abstract class Repository
 {
     /**
-     * @property class-string<Aggregate> $aggregate
+     * @property class-string<Aggregate> $aggregateClass
      */
-    protected string $aggregate;
+    protected string $aggregateClass;
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
@@ -28,7 +28,7 @@ abstract class Repository
 
     protected function entityMapper(): EntityMapper
     {
-        return $this->mapperResolver->resolve($this->aggregate);
+        return $this->mapperResolver->resolve($this->aggregateClass);
     }
 
     protected function saveEntity(Entity|Aggregate $entity): Model
@@ -83,7 +83,7 @@ abstract class Repository
 
     private function ensureAggregateIsSet()
     {
-        if (! isset($this->aggregate) || ! is_subclass_of(app($this->aggregate), Aggregate::class)) {
+        if (! isset($this->aggregateClass) || ! is_subclass_of(app($this->aggregateClass), Aggregate::class)) {
             throw new LogicException('Repository must define a valid aggregate class');
         }
     }
