@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Contracts\AggregateRoot;
 use Lava83\DddFoundation\Domain\Contracts\DomainEvent;
+use LogicException;
 
 /**
  * Base class for Aggregate Root entities
@@ -99,10 +100,27 @@ abstract class Aggregate extends Entity implements AggregateRoot
 
     /**
      * Helper method for aggregate roots to update and record change event
+     *
+     * @param  array<string, mixed>  $changes  Key-value pairs of changes made to the aggregate
      */
-    protected function updateAggregateRoot(?DomainEvent $event = null): void
-    {
-        $this->updateEntity();
+    protected function updateAggregateRoot(
+        array $changes,
+        ?string $eventClass = null,
+        ?DomainEvent $event = null
+    ): void {
+        $changesCollection = $this->updateEntity($changes);
+
+        if ($changesCollection->isEmpty()) {
+            return;
+        }
+
+        if ($eventClass !== null) {
+            if (! is_a($eventClass, DomainEvent::class, true)) {
+                throw new LogicException("Event class {$eventClass} must implement DomainEvent interface");
+            }
+
+            $event = new $eventClass($this->id(), $changesCollection);
+        }
 
         if ($event) {
             $this->recordEvent($event);
@@ -144,5 +162,12 @@ abstract class Aggregate extends Entity implements AggregateRoot
     public function countEventsOfType(string $eventName): int
     {
         return $this->domainEvents->filter(fn (DomainEvent $event) => $event->eventName() === $eventName)->count();
+    }
+
+    protected function updateDirtyEntity(): void
+    {
+        parent::updateDirtyEntity();
+
+        throw new LogicException('updateDirtyEntity must be implemented in child classes to apply changes');
     }
 }

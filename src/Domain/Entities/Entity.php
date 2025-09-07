@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
+use LogicException;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
@@ -79,17 +80,14 @@ abstract class Entity
         $this->version = $version;
     }
 
-    /**
-     * Hydration from persistence layer
-     * Called when reconstituting from database
-     *
-     * @param  array{created_at: string, updated_at: ?string, version: int}  $data
-     */
-    public function hydrate(array $data): void
-    {
-        $this->createdAt = new CarbonImmutable((string) $data['created_at']);
-        $this->updatedAt = isset($data['updated_at']) ? new CarbonImmutable((string) $data['updated_at']) : null;
-        $this->version = (int) $data['version'];
+    public function hydrateEntity(
+        CarbonImmutable $createdAt,
+        ?CarbonImmutable $updatedAt,
+        int $version
+    ): void {
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
+        $this->version = $version;
     }
 
     /**
@@ -131,10 +129,21 @@ abstract class Entity
 
     /**
      * Helper method for child entities to update themselves
+     *
+     * @param  array<string, mixed>  $changes  Key-value pairs of changes made to the aggregate
      */
-    protected function updateEntity(): void
+    protected function updateEntity(array $changes): Collection
     {
+        $changes = $this->collectChanges($changes);
+
+        if ($changes->isEmpty()) {
+            return $changes;
+        }
+
+        $this->applyChanges($changes);
         $this->touch();
+
+        return $changes;
     }
 
     /**
@@ -268,6 +277,11 @@ abstract class Entity
                 $setter($changes->get("new_{$property}"));
             }
         }
+    }
+
+    protected function updateDirtyEntity(): void
+    {
+        throw new LogicException('updateDirtyEntity must be implemented in child classes to apply changes');
     }
 
     abstract protected function applyChanges(Collection $changes): void;
