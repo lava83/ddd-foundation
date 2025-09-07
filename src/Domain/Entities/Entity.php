@@ -80,7 +80,7 @@ abstract class Entity
         $this->version = $version;
     }
 
-    public function hydrateEntity(
+    public function hydrate(
         CarbonImmutable $createdAt,
         ?CarbonImmutable $updatedAt,
         int $version
