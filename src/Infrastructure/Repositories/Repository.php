@@ -23,7 +23,7 @@ abstract class Repository
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
-        // $this->ensureAggregateIsSet();
+        $this->ensureAggregateIsSet();
     }
 
     protected function entityMapper(): EntityMapper
@@ -62,10 +62,12 @@ abstract class Repository
 
     protected function handleOptimisticLocking(Model $model, Entity $entity): void
     {
-        if ($model->version !== $entity->version()) {
+        $expectedDatabaseVersion = $entity->version() - 1; // Entity version is already incremented
+
+        if ($model->version !== $expectedDatabaseVersion) {
             throw new ConcurrencyException(
                 "Entity {$entity->id()->value()} was modified by another process. ".
-                "Expected version: {$entity->version()}, ".
+                "Expected version: {$expectedDatabaseVersion}, ".
                 "Actual version: {$model->version}"
             );
         }
