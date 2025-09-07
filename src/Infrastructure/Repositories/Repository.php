@@ -12,7 +12,6 @@ use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Models\Model;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
-use LogicException;
 
 abstract class Repository
 {
@@ -23,7 +22,7 @@ abstract class Repository
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
-        // $this->ensureAggregateIsSet();
+        // @todo implement ensuring of aggregate class being set and is a subclass of Aggregate
     }
 
     protected function entityMapper(): EntityMapper
@@ -35,16 +34,11 @@ abstract class Repository
     {
         $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
 
-        if ($model->exists) {
-            $this->handleOptimisticLocking($model, $entity);
-        }
-
-        if (! $model->save()) {
-            throw new CantSaveModel('Failed to save entity');
-        }
-
-        if ($entity instanceof Aggregate) {
-            $this->dispatchUncommittedEvents($entity);
+        if (
+            $entity->isDirty()
+            || $model->exists === false
+        ) {
+            $this->persistDirtyEntity($entity, $model);
         }
 
         $this->syncEntityFromModel($entity, $model);
@@ -62,7 +56,7 @@ abstract class Repository
 
     protected function handleOptimisticLocking(Model $model, Entity $entity): void
     {
-        $expectedDatabaseVersion = $entity->version() - 1; // Entity version is already incremented
+        $expectedDatabaseVersion = $entity->version();
 
         if ($model->version !== $expectedDatabaseVersion) {
             throw new ConcurrencyException(
@@ -83,10 +77,18 @@ abstract class Repository
         ]);
     }
 
-    private function ensureAggregateIsSet()
+    private function persistDirtyEntity(Entity|Aggregate $entity, Model $model): void
     {
-        if (! isset($this->aggregateClass) || ! is_subclass_of(app($this->aggregateClass), Aggregate::class)) {
-            throw new LogicException('Repository must define a valid aggregate class');
+        if ($model->exists) {
+            $this->handleOptimisticLocking($model, $entity);
+        }
+
+        if (! $model->save()) {
+            throw new CantSaveModel('Failed to save entity');
+        }
+
+        if ($entity instanceof Aggregate) {
+            $this->dispatchUncommittedEvents($entity);
         }
     }
 }

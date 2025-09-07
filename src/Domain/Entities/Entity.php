@@ -16,11 +16,15 @@ use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
  */
 abstract class Entity
 {
+    protected Collection $dirty;
+
     public function __construct(
         protected CarbonImmutable $createdAt = new CarbonImmutable,
         protected ?CarbonImmutable $updatedAt = null,
         protected int $version = 0,
-    ) {}
+    ) {
+        $this->dirty = collect();
+    }
 
     /**
      * Get the entity's unique identifier
@@ -217,20 +221,31 @@ abstract class Entity
         ];
     }
 
+    public function isDirty(): bool
+    {
+        return $this->dirty->isNotEmpty();
+    }
+
+    public function dirty(): Collection
+    {
+
+        return $this->dirty;
+    }
+
     protected function collectChanges(array $newValues): Collection
     {
-        $changes = collect();
+        $this->resetDirty();
 
         foreach ($newValues as $property => $newValue) {
             $currentValue = $this->$property;
 
             if ($this->hasChanged($currentValue, $newValue)) {
-                $changes->put("old_{$property}", $currentValue);
-                $changes->put("new_{$property}", $newValue);
+                $this->dirty->put("old_{$property}", $currentValue);
+                $this->dirty->put("new_{$property}", $newValue);
             }
         }
 
-        return $changes;
+        return $this->dirty;
     }
 
     protected function hasChanged(mixed $current, mixed $new): bool
@@ -256,4 +271,9 @@ abstract class Entity
     }
 
     abstract protected function applyChanges(Collection $changes): void;
+
+    private function resetDirty(): void
+    {
+        $this->dirty = collect();
+    }
 }
