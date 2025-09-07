@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
+use Lava83\DddFoundation\Infrastructure\Models\Model;
 use LogicException;
 
 /**
@@ -81,13 +82,11 @@ abstract class Entity
     }
 
     public function hydrate(
-        CarbonImmutable $createdAt,
-        ?CarbonImmutable $updatedAt,
-        int $version
+        Model $model,
     ): void {
-        $this->createdAt = $createdAt;
-        $this->updatedAt = $updatedAt;
-        $this->version = $version;
+        $this->createdAt = CarbonImmutable::parse($model->created_at);
+        $this->updatedAt = $model->updated_at ? CarbonImmutable::parse($model->updated_at) : null;
+        $this->version = $model->version;
     }
 
     /**
