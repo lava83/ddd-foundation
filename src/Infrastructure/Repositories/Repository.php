@@ -23,7 +23,7 @@ abstract class Repository
 
     public function __construct(private EntityMapperResolver $mapperResolver)
     {
-        $this->ensureAggregateIsSet();
+        // $this->ensureAggregateIsSet();
     }
 
     protected function entityMapper(): EntityMapper
