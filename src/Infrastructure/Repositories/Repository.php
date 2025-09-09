@@ -70,11 +70,7 @@ abstract class Repository
     protected function syncEntityFromModel(Entity $entity, Model $model): void
     {
         // Update entity with final database values
-        $entity->hydrate([
-            'created_at' => $model->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $model->updated_at?->format('Y-m-d H:i:s'),
-            'version' => $model->version,
-        ]);
+        $entity->hydrate($model);
     }
 
     private function persistDirtyEntity(Entity|Aggregate $entity, Model $model): void
