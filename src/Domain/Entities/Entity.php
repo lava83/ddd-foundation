@@ -7,8 +7,8 @@ namespace Lava83\DddFoundation\Domain\Entities;
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 use Lava83\DddFoundation\Infrastructure\Models\Model;
 use LogicException;
 
@@ -32,7 +32,9 @@ abstract class Entity
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
      *
-     * @return Id|MongoObjectId
+     * @return Uuid|MongoObjectId
+     *
+     * @todo here we expect only an Id not the types of it
      */
     abstract public function id();
 

@@ -6,14 +6,14 @@ namespace Lava83\DddFoundation\Domain\Contracts;
 
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 
 interface DomainEvent
 {
     /**
      * Get the aggregate ID that triggered this event
      */
-    public function aggregateId(): Id;
+    public function aggregateId(): Uuid;
 
     /**
      * Get the event name/type

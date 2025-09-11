@@ -7,12 +7,12 @@ namespace Lava83\DddFoundation\Domain\ValueObjects\Identity;
 use DateTimeInterface;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 use Ramsey\Uuid\UuidInterface;
 
 // @todo this is only a base class without specification of UUID or whatever.
 
-class Id implements JsonSerializable
+class Uuid implements JsonSerializable
 {
     private UuidInterface $value;
 
@@ -25,12 +25,12 @@ class Id implements JsonSerializable
         }
 
         $this->validate($value);
-        $this->value = Uuid::fromString($value);
+        $this->value = RamseyUuid::fromString($value);
     }
 
     public static function generate(): static
     {
-        return new static(Uuid::uuid7(now())->toString());
+        return new static(RamseyUuid::uuid7(now())->toString());
     }
 
     public static function fromString(string $value): static
@@ -45,7 +45,7 @@ class Id implements JsonSerializable
 
     public static function fromBytes(string $bytes): static
     {
-        return new static(Uuid::fromBytes($bytes)->toString());
+        return new static(RamseyUuid::fromBytes($bytes)->toString());
     }
 
     public static function fromPrefixed(string $prefixedId): static
@@ -84,7 +84,7 @@ class Id implements JsonSerializable
     }
 
     /**
-     * @return array<Id>
+     * @return array<Uuid>
      */
     public static function createMany(int $count): array
     {
@@ -106,12 +106,12 @@ class Id implements JsonSerializable
     }
 
     /**
-     * @param  array<Id>  $ids
+     * @param  array<Uuid>  $ids
      * @return array<string>
      */
     public static function toStringArray(array $ids): array
     {
-        return array_map(fn (Id $id) => $id->value(), $ids);
+        return array_map(fn (Uuid $id) => $id->value(), $ids);
     }
 
     public function value(): string
@@ -134,7 +134,7 @@ class Id implements JsonSerializable
         return $this->value->getHex()->toString();
     }
 
-    public function equals(Id $other): bool
+    public function equals(Uuid $other): bool
     {
         return $this->value->equals($other->value);
     }
@@ -168,7 +168,7 @@ class Id implements JsonSerializable
     /**
      * Compare IDs for sorting purposes
      */
-    public function compareTo(Id $other): int
+    public function compareTo(Uuid $other): int
     {
         return $this->uuid()->compareTo($other->uuid());
     }
@@ -176,7 +176,7 @@ class Id implements JsonSerializable
     /**
      * Check if this ID comes before another ID (useful for ordering)
      */
-    public function isBefore(Id $other): bool
+    public function isBefore(Uuid $other): bool
     {
         return $this->compareTo($other) < 0;
     }
@@ -184,7 +184,7 @@ class Id implements JsonSerializable
     /**
      * Check if this ID comes after another ID (useful for ordering)
      */
-    public function isAfter(Id $other): bool
+    public function isAfter(Uuid $other): bool
     {
         return $this->compareTo($other) > 0;
     }
@@ -211,7 +211,7 @@ class Id implements JsonSerializable
      */
     public function isNil(): bool
     {
-        return (string) $this->value === Uuid::NIL;
+        return (string) $this->value === RamseyUuid::NIL;
     }
 
     /**
@@ -272,14 +272,14 @@ class Id implements JsonSerializable
             throw new ValidationException('Id cannot be empty');
         }
 
-        if (! Uuid::isValid($value)) {
+        if (! RamseyUuid::isValid($value)) {
             throw new ValidationException('Invalid UUID format: '.$value);
         }
 
-        $uuid = Uuid::fromString($value);
+        $uuid = RamseyUuid::fromString($value);
 
         if (
-            $value !== Uuid::NIL
+            $value !== RamseyUuid::NIL
             && $uuid->getVersion() < 4
         ) {
             throw new ValidationException('Only UUID version 4 or higher are allowed, got version: '.$uuid->getVersion());

@@ -6,24 +6,24 @@ namespace Lava83\DddFoundation\Domain\Contracts;
 
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
-use Lava83\DddFoundation\Domain\ValueObjects\Identity\Id;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 
 interface Repository
 {
     /**
      * Get next available ID for this entity type
      */
-    public function nextId(): Id;
+    public function nextId(): Uuid;
 
     /**
      * Check if an aggregate exists by ID
      */
-    public function exists(Id $id): bool;
+    public function exists(Uuid $id): bool;
 
     /**
      * Delete an aggregate by ID
      */
-    public function delete(Id $id): void;
+    public function delete(Uuid $id): void;
 
     /**
      * Get all aggregates
