@@ -6,9 +6,10 @@ namespace Lava83\DddFoundation\Domain\ValueObjects\Data;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
+use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-class Json
+class Json implements JsonSerializable
 {
     private readonly Fluent $data;
 
@@ -120,6 +121,11 @@ class Json
     public function equals(self $other): bool
     {
         return $this->value === $other->value;
+    }
+
+    public function jsonSerialize(): string
+    {
+        return $this->value;
     }
 
     public function __toString(): string
