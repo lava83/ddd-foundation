@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Lava83\DddFoundation\Domain\ValueObjects\Communication;
 
 use Illuminate\Support\Stringable;
+use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-class Link
+class Link implements JsonSerializable
 {
     private Stringable $value;
 
@@ -60,11 +61,16 @@ class Link
         return (string) $this->value;
     }
 
+    public function jsonSerialize(): string
+    {
+        return (string) $this->value;
+    }
+
     private function extractParts(string $link): void
     {
         $parts = parse_url($link);
 
-        if (! isset($parts['scheme'], $parts['host'])) {
+        if (!isset($parts['scheme'], $parts['host'])) {
             throw new ValidationException('Invalid URL format provided');
         }
 
