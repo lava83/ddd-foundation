@@ -38,17 +38,15 @@ class MongoObjectId implements JsonSerializable
     /**
      * @return array{value: string}
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): string
     {
-        return [
-            'value' => $this->value,
-        ];
+        return $this->value;
     }
 
     private function validate(string $value): void
     {
         // ObjectId must be exactly 24 hexadecimal characters
-        if (! preg_match('/^[a-f0-9]{24}$/i', $value)) {
+        if (!preg_match('/^[a-f0-9]{24}$/i', $value)) {
             throw new ValidationException(
                 "Invalid ObjectId format. Expected 24 hexadecimal characters, got: {$value}"
             );
