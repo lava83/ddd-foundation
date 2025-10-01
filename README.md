@@ -1,696 +1,1014 @@
-# DDD Foundation
+# DDD Foundation for Laravel
 
-A robust Domain-Driven Design foundation package for Laravel applications, providing essential building blocks including aggregate roots, domain events, value objects, and shared contracts for clean domain modeling.
+A comprehensive toolkit providing foundational building blocks for implementing Domain-Driven Design (DDD) patterns in Laravel 12+ applications. This package offers battle-tested base classes, contracts, and infrastructure components to help you build scalable, maintainable domain-driven applications.
 
-## Badges
+## Features
 
-[![Tests](https://github.com/lava83/ddd-foundation/actions/workflows/tests.yml/badge.svg)](https://github.com/lava83/ddd-foundation/actions/workflows/tests.yml)
-[![PHPStan](https://github.com/lava83/ddd-foundation/actions/workflows/phpstan.yml/badge.svg)](https://github.com/lava83/ddd-foundation/actions/workflows/phpstan.yml)
-[![Latest Stable Version](https://poser.pugx.org/lava83/ddd-foundation/v/stable)](https://packagist.org/packages/lava83/ddd-foundation)
-[![License](https://poser.pugx.org/lava83/ddd-foundation/license)](https://packagist.org/packages/lava83/ddd-foundation)
+- 🏗️ **Aggregate & Entity Base Classes** - Ready-to-use foundation for domain entities with built-in versioning and timestamps
+- 🎯 **Event Sourcing Support** - Complete domain event handling with automatic event dispatching via Laravel's event system
+- 🔄 **Repository Pattern** - Abstract repository implementation with entity-model mapping
+- 🗺️ **Entity-Model Mappers** - Clean separation between domain and infrastructure layers
+- 🆔 **UUID Primary Keys** - Built-in UUID support for entities and models
+- 🔐 **Optimistic Locking** - Automatic version tracking to prevent concurrent update conflicts
+- 📦 **Value Objects** - Type-safe value object implementations (MongoObjectId, UUID, Email, Link, Json)
+- 🔌 **Service Layer Pattern** - Interfaces for application and domain services
+- ⚡ **Transaction Support** - Automatic transaction handling in repositories
 
-## Overview
+## Requirements
 
-This package provides foundational building blocks for implementing Domain-Driven Design (DDD) patterns in Laravel 12+ applications with strict layer separation and API-first architecture.
-
-### Key Features
-
-- **Clean Architecture**: Strict DDD layer separation with minimal framework coupling
-- **Aggregate Roots**: Complete implementation with domain event handling
-- **Rich Value Objects**: Type-safe value objects with business validation (Id, Email, Money, DateRange)
-- **Entity Mappers**: Seamless domain ↔ infrastructure transformation
-- **Optimistic Locking**: Built-in concurrency control with versioning
-- **Domain Events**: Event sourcing with automatic publishing
-- **Repository Pattern**: Clean data access abstraction
-- **Enterprise Validation**: Business rule enforcement in value objects
-
-## Architecture
-
-```
-src/
-├── Domain/
-│   └── Shared/
-│       ├── Contracts/          # Domain interfaces
-│       │   ├── DomainEvent.php
-│       │   └── Repository.php
-│       ├── Entities/           # Domain entities
-│       │   ├── BaseEntity.php
-│       │   └── BaseAggregateRoot.php
-│       ├── Events/             # Domain events
-│       │   └── BaseDomainEvent.php
-│       ├── Exceptions/         # Domain exceptions
-│       │   └── ValidationException.php
-│       └── ValueObjects/       # Value objects
-│           ├── Id.php
-│           ├── Email.php
-│           ├── Money.php
-│           └── DateRange.php
-└── Infrastructure/
-    ├── Contracts/              # Infrastructure interfaces
-    │   └── EntityMapper.php
-    ├── Models/                 # Eloquent models
-    │   ├── BaseModel.php
-    │   └── Concerns/
-    │       └── HasUuids.php
-    ├── Repositories/           # Repository implementations
-    │   └── Repository.php
-    ├── Mappers/                # Entity ↔ Model mappers
-    │   └── EntityMapperResolver.php
-    ├── Services/               # Infrastructure services
-    │   └── DomainEventPublisher.php
-    └── Exceptions/             # Infrastructure exceptions
-        ├── CantSaveModel.php
-        └── ConcurrencyException.php
-```
-
-## Prerequisites
-
-- PHP 8.2 or later
-- Laravel 12.22 or later
-- Composer
+- **PHP**: 8.3+
+- **Laravel**: 12+
+- **Dependencies**: 
+  - `illuminate/support`
+  - `illuminate/database`
+  - `illuminate/events`
+  - `spatie/laravel-data`
+  - `ramsey/uuid`
 
 ## Installation
 
-### Step 1: Install Laravel Installer
-
-```bash
-composer global require laravel/installer
-```
-
-### Step 2: Create New Laravel Project
-
-```bash
-laravel new your-project-name
-cd your-project-name
-```
-
-### Step 3: Install DDD Foundation Package
+Install via Composer:
 
 ```bash
 composer require lava83/ddd-foundation
 ```
 
-### Step 4: Register Package Services
+## Core Concepts
 
-Create a DDD service provider:
+### Entity Hierarchy
 
-```bash
-php artisan make:provider DddServiceProvider
+```
+Entity (Base)
+    ├── Aggregate (extends Entity + Event Handling)
+    └── Child Entities (extend Entity)
 ```
 
-Configure your service provider:
+## Quick Start Guide
+
+### 1. Creating an Entity
+
+Entities are domain objects with identity that can change over time:
 
 ```php
 <?php
-// app/Providers/DddServiceProvider.php
 
-namespace App\Providers;
+declare(strict_types=1);
 
-use Illuminate\Support\ServiceProvider;
-use Lava83\DddFoundation\Infrastructure\Mappers\EntityMapperResolver;
+namespace App\Domain\TrelloManagement\Entities;
+
+use Illuminate\Support\Collection;
+use Lava83\DddFoundation\Domain\Entities\Entity;
+use App\Domain\TrelloManagement\ValueObjects\Identity\MemberId;
+
+class Member extends Entity
+{
+    public function __construct(
+        private MemberId $trelloId,
+        protected string $fullName,
+        protected string $username,
+    ) {
+        parent::__construct();
+    }
+
+    public function id(): MemberId
+    {
+        return $this->trelloId;
+    }
+
+    public function fullName(): string
+    {
+        return $this->fullName;
+    }
+
+    public function username(): string
+    {
+        return $this->username;
+    }
+
+    public function update(string $fullName, string $username): void
+    {
+        $this->updateEntity([
+            'fullName' => $fullName,
+            'username' => $username,
+        ]);
+    }
+
+    protected function applyChanges(Collection $changes): void
+    {
+        $this->applyChangesByPropertyMap([
+            'fullName' => fn($value) => $this->fullName = $value,
+            'username' => fn($value) => $this->username = $value,
+        ], $changes);
+    }
+}
+```
+
+### 2. Creating an Aggregate Root
+
+Aggregates are the main entry points for domain operations and manage domain events:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\TrelloManagement\Entities;
+
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
+use Lava83\DddFoundation\Domain\Entities\Aggregate;
+use Lava83\DddFoundation\Domain\ValueObjects\Communication\Link;
+use App\Domain\TrelloManagement\Events\BoardCreated;
+use App\Domain\TrelloManagement\Events\BoardUpdated;
+use App\Domain\TrelloManagement\ValueObjects\Identity\BoardId;
+
+class Board extends Aggregate
+{
+    public function __construct(
+        protected BoardId $trelloId,
+        protected string $name,
+        protected string $description,
+        protected bool $isClosed,
+        protected Link $link,
+        protected Link $shortUrl,
+        protected bool $isSubscribed,
+        protected ?CarbonImmutable $closedAt,
+        protected ?CarbonImmutable $lastActivityAt,
+        protected ?CarbonImmutable $lastView,
+        protected Collection $lists,
+        protected ?Webhook $webhook,
+    ) {
+        parent::__construct();
+    }
+
+    public static function create(
+        BoardId $trelloId,
+        string $name,
+        string $description,
+        bool $isClosed,
+        Link $link,
+        Link $shortUrl,
+        bool $isSubscribed,
+        ?CarbonImmutable $closedAt = null,
+        ?CarbonImmutable $lastActivityAt = null,
+        ?CarbonImmutable $lastView = null,
+    ): self {
+        $board = new self(
+            trelloId: $trelloId,
+            name: $name,
+            description: $description,
+            isClosed: $isClosed,
+            link: $link,
+            shortUrl: $shortUrl,
+            isSubscribed: $isSubscribed,
+            closedAt: $closedAt,
+            lastActivityAt: $lastActivityAt,
+            lastView: $lastView,
+            lists: new Collection,
+            webhook: null,
+        );
+
+        $board->recordEvent(
+            new BoardCreated(
+                $board->id(),
+                collect([
+                    'trelloId' => $board->trelloId(),
+                    'name' => $board->name(),
+                    'description' => $board->description(),
+                    // ... other data
+                ])
+            )
+        );
+
+        return $board;
+    }
+
+    public function id(): BoardId
+    {
+        return $this->trelloId;
+    }
+
+    public function update(
+        string $name,
+        string $description,
+        bool $isClosed,
+        Link $link,
+        Link $shortUrl,
+        bool $isSubscribed,
+        ?CarbonImmutable $closedAt,
+        ?CarbonImmutable $lastActivityAt,
+        ?CarbonImmutable $lastView
+    ): void {
+        $this->updateAggregateRoot(
+            [
+                'name' => $name,
+                'description' => $description,
+                'isClosed' => $isClosed,
+                'link' => $link,
+                'shortUrl' => $shortUrl,
+                'isSubscribed' => $isSubscribed,
+                'closedAt' => $closedAt,
+                'lastActivityAt' => $lastActivityAt,
+                'lastView' => $lastView,
+            ],
+            BoardUpdated::class,
+        );
+    }
+
+    protected function applyChanges(Collection $changes): void
+    {
+        $this->applyChangesByPropertyMap([
+            'name' => fn($value) => $this->name = $value,
+            'description' => fn($value) => $this->description = $value,
+            'isClosed' => fn($value) => $this->isClosed = $value,
+            'link' => fn($value) => $this->link = $value,
+            'shortUrl' => fn($value) => $this->shortUrl = $value,
+            'isSubscribed' => fn($value) => $this->isSubscribed = $value,
+            'closedAt' => fn($value) => $this->closedAt = $value,
+            'lastActivityAt' => fn($value) => $this->lastActivityAt = $value,
+            'lastView' => fn($value) => $this->lastView = $value,
+        ], $changes);
+    }
+}
+```
+
+### 3. Implementing a Repository
+
+Repositories provide collection-like access to aggregates:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Repositories\Trello;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Lava83\DddFoundation\Infrastructure\Repositories\Repository;
+use App\Domain\TrelloManagement\Contracts\Board\BoardRepositoryInterface;
+use App\Domain\TrelloManagement\Entities\Board;
+use App\Domain\TrelloManagement\ValueObjects\Identity\BoardId;
+use App\Infrastructure\Mappers\Trello\BoardMapper;
+use App\Infrastructure\Models\Trello\Board\BoardModel;
+
+class EloquentBoardRepository extends Repository implements BoardRepositoryInterface
+{
+    protected string $aggregateClass = Board::class;
+
+    public function exists(BoardId $boardId): bool
+    {
+        return BoardModel::where('trello_id', $boardId->toString())->exists();
+    }
+
+    public function find(BoardId $boardId): ?Board
+    {
+        $model = BoardModel::with(['boardLists', 'webhook'])
+            ->find($boardId->toString());
+
+        return $model ? BoardMapper::toEntity($model, true) : null;
+    }
+
+    public function findOrFail(BoardId $boardId): Board
+    {
+        return BoardMapper::toEntity(
+            BoardModel::with(['boardLists', 'webhook'])
+                ->findOrFail($boardId->toString()),
+            true
+        );
+    }
+
+    public function findAll(): Collection
+    {
+        return BoardModel::with(['boardLists', 'webhook'])
+            ->latest()
+            ->get()
+            ->map(fn(BoardModel $model) => BoardMapper::toEntity($model, true));
+    }
+
+    public function save(Board $board): void
+    {
+        DB::transaction(fn() => $this->saveEntity($board));
+    }
+
+    public function delete(Board $board): void
+    {
+        // Implementation
+    }
+}
+```
+
+### 4. Creating Entity-Model Mappers
+
+Mappers handle the translation between domain entities and infrastructure models:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Mappers\Trello;
+
+use Lava83\DddFoundation\Domain\Entities\Entity;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
+use Lava83\DddFoundation\Infrastructure\Models\Model;
+use App\Domain\TrelloManagement\Entities\Member;
+use App\Domain\TrelloManagement\ValueObjects\Identity\MemberId;
+use App\Infrastructure\Models\Trello\Member\MemberModel;
 
-class DddServiceProvider extends ServiceProvider
+class MemberMapper implements EntityMapper
 {
-    public function register(): void
+    /**
+     * @param MemberModel $model
+     */
+    public static function toEntity(Model $model, bool $deep = false): Entity
     {
-        // Register entity mappers
-        $this->app->singleton(EntityMapperResolver::class, function () {
-            return new class extends EntityMapperResolver {
-                public function resolve(string $entityClass): EntityMapper
-                {
-                    return match($entityClass) {
-                        // Register your entity mappers here
-                        default => throw new \InvalidArgumentException("No mapper found for {$entityClass}"),
-                    };
-                }
-            };
-        });
+        $member = new Member(
+            trelloId: MemberId::fromString($model->trello_id),
+            fullName: $model->full_name,
+            username: $model->username,
+        );
 
-        // Register repository interfaces
-        // $this->app->bind(YourRepositoryInterface::class, YourRepository::class);
+        $member->hydrate($model);
+
+        return $member;
     }
 
-    public function boot(): void
+    /**
+     * @param Member $entity
+     */
+    public static function toModel(Entity $entity): MemberModel
     {
-        //
+        $data = [
+            'trello_id' => $entity->trelloId(),
+            'full_name' => $entity->fullName(),
+            'username' => $entity->username(),
+            'created_at' => $entity->createdAt(),
+            'updated_at' => $entity->updatedAt(),
+            'version' => $entity->version(),
+        ];
+
+        $member = MemberModel::findOr(
+            $entity->id(), 
+            ['*'], 
+            fn() => app(MemberModel::class)
+        );
+        $member->fill($data);
+
+        return $member;
     }
 }
 ```
 
-Register the service provider in `config/app.php`:
+### 5. Registering Mappers
 
-```php
-'providers' => [
-    // ... other providers
-    App\Providers\DddServiceProvider::class,
-],
-```
-
-## Usage
-
-### Creating Entities
+Create a mapper resolver to manage entity-to-mapper relationships:
 
 ```php
 <?php
 
-namespace App\Domain\User\Entities;
-
-use Lava83\DddFoundation\Domain\Shared\Entities\BaseEntity;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
-
-class User extends BaseEntity
-{
-    public function __construct(
-        private Id $id,
-        private string $email,
-        private string $name,
-    ) {
-        parent::__construct();
-    }
-
-    public function id(): Id
-    {
-        return $this->id;
-    }
-
-    public function changeName(string $newName): void
-    {
-        $this->name = $newName;
-        $this->touch(); // Updates version and timestamp
-    }
-
-    // ... other methods
-}
-```
-
-### Creating Aggregate Roots
-
-```php
-<?php
-
-namespace App\Domain\Order\Entities;
-
-use Lava83\DddFoundation\Domain\Shared\Entities\BaseAggregateRoot;
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
-
-class Order extends BaseAggregateRoot
-{
-    public function __construct(
-        private Id $id,
-        private Id $customerId,
-        private array $items = [],
-    ) {
-        parent::__construct();
-        $this->recordEvent(new OrderCreated($this->id, $this->customerId));
-    }
-
-    public function addItem(OrderItem $item): void
-    {
-        $this->items[] = $item;
-        $this->recordEvent(new OrderItemAdded($this->id, $item));
-        $this->touch();
-    }
-
-    // ... other methods
-}
-```
-
-### Working with Value Objects
-
-#### Id Value Objects
-
-```php
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Id;
-
-// Custom ID with prefix
-class OrderId extends Id
-{
-    protected string $prefix = 'order';
-}
-
-// Usage
-$orderId = OrderId::generate(); // Creates UUID v7
-$customId = OrderId::fromString('01234567-89ab-cdef-0123-456789abcdef');
-```
-
-#### Email Value Objects
-
-```php
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Email;
-
-$email = Email::fromString('user@example.com');
-
-// Access parts
-echo $email->localPart(); // 'user'
-echo $email->domain(); // 'example.com'
-
-// Business methods
-if ($email->isValidForNotifications()) {
-    // Send notifications
-}
-```
-
-#### Money Value Objects
-
-```php
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\Money;
-
-$price = Money::fromAmount(1000, 'USD'); // $10.00 USD
-$discount = Money::fromAmount(200, 'USD');
-
-$total = $price->subtract($discount); // $8.00 USD
-$doubled = $price->multiply(2); // $20.00 USD
-```
-
-#### DateRange Value Objects
-
-```php
-use Lava83\DddFoundation\Domain\Shared\ValueObjects\DateRange;
-
-$campaign = DateRange::fromString('2025-01-01', '2025-12-31');
-$week = DateRange::currentWeek();
-
-if ($campaign->contains(now())) {
-    echo "Campaign is active!";
-}
-
-echo $campaign->durationInDays(); // 365
-```
-
-### Entity Mappers
-
-```php
-<?php
+declare(strict_types=1);
 
 namespace App\Infrastructure\Mappers;
 
-use Illuminate\Database\Eloquent\Model;
+use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
-use Lava83\DddFoundation\Domain\Shared\Entities\BaseAggregateRoot;
-use Lava83\DddFoundation\Infrastructure\Models\BaseModel;
+use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapperResolver as EntityMapperResolverContract;
+use App\Domain\TrelloManagement\Entities\Board;
+use App\Domain\TrelloManagement\Entities\Member;
+use App\Infrastructure\Mappers\Trello\BoardMapper;
+use App\Infrastructure\Mappers\Trello\MemberMapper;
 
-class OrderMapper implements EntityMapper
+class EntityMapperResolver implements EntityMapperResolverContract
 {
-    public static function toEntity(Model $model, bool $deep = false): BaseAggregateRoot
+    /**
+     * @param class-string<Aggregate> $entityClass
+     */
+    public function resolve(string $entityClass): EntityMapper
     {
-        $order = new Order(
-            OrderId::fromString($model->id),
-            CustomerId::fromString($model->customer_id)
-        );
-
-        // Restore entity state
-        $order->hydrate([
-            'created_at' => $model->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $model->updated_at?->format('Y-m-d H:i:s'),
-            'version' => $model->version,
-        ]);
-
-        return $order;
-    }
-
-    public static function toModel(BaseAggregateRoot $entity): BaseModel
-    {
-        $model = new OrderModel();
-        $model->id = $entity->id()->value();
-        $model->customer_id = $entity->customerId()->value();
-        $model->status = $entity->status();
-        $model->version = $entity->version();
-
-        return $model;
+        return match ($entityClass) {
+            Board::class => app(BoardMapper::class),
+            Member::class => app(MemberMapper::class),
+            default => throw new NoMapperFoundForEntity($entityClass),
+        };
     }
 }
 ```
 
-### Repository Implementation
+Register in your service provider:
+
+```php
+$this->app->singleton(
+    EntityMapperResolverContract::class,
+    EntityMapperResolver::class,
+);
+```
+
+### 6. Working with Domain Events
+
+Create domain events to capture important business occurrences:
 
 ```php
 <?php
 
-namespace App\Infrastructure\Repositories;
+declare(strict_types=1);
 
-use Lava83\DddFoundation\Infrastructure\Repositories\Repository as BaseRepository;
-use App\Domain\Order\Contracts\OrderRepositoryInterface;
+namespace App\Domain\TrelloManagement\Events;
 
-class OrderRepository extends BaseRepository implements OrderRepositoryInterface
+use Lava83\DddFoundation\Domain\Events\DomainEvent;
+
+class BoardCreated extends DomainEvent
 {
-    public function save(Order $order): void
+    public function eventName(): string
     {
-        $this->saveEntity($order); // Handles events and optimistic locking
+        return 'trello.board.created';
     }
-
-    public function findById(OrderId $id): ?Order
-    {
-        $model = OrderModel::find($id->value());
-        
-        if (!$model) {
-            return null;
-        }
-
-        return OrderMapper::toEntity($model);
-    }
-
-    public function nextId(): OrderId
-    {
-        return OrderId::generate();
-    }
-
-    // ... other repository methods
 }
 ```
 
-### Domain Events
+Handle events using Laravel Event Subscribers:
 
 ```php
 <?php
 
-namespace App\Domain\Order\Events;
+declare(strict_types=1);
 
-use Lava83\DddFoundation\Domain\Shared\Events\BaseDomainEvent;
+namespace App\Application\Listeners;
 
-class OrderCompleted extends BaseDomainEvent
+use Illuminate\Events\Dispatcher;
+use App\Domain\TrelloManagement\Events\BoardCreated;
+use App\Domain\TrelloManagement\Events\BoardUpdated;
+
+class BoardEventSubscriber
 {
-    public function __construct(
-        private OrderId $orderId,
-    ) {
-        parent::__construct();
-    }
-
-    public function aggregateId(): OrderId
+    public function handleBoardCreated(BoardCreated $event): void
     {
-        return $this->orderId;
+        // Handle board creation
+        // e.g., send notifications, update read models, etc.
     }
 
-    public function eventType(): string
+    public function handleBoardUpdated(BoardUpdated $event): void
     {
-        return 'order.completed';
+        // Handle board updates
     }
 
-    public function eventData(): array
+    public function subscribe(Dispatcher $events): array
     {
         return [
-            'order_id' => $this->orderId->value(),
+            BoardCreated::class => 'handleBoardCreated',
+            BoardUpdated::class => 'handleBoardUpdated',
         ];
     }
 }
 ```
 
-### Event Listeners
+Register the subscriber in your `EventServiceProvider`:
 
 ```php
-<?php
-// app/Providers/EventServiceProvider.php
-
-protected $listen = [
-    OrderCompleted::class => [
-        SendOrderConfirmationEmail::class,
-        UpdateCustomerStatistics::class,
-    ],
+protected $subscribe = [
+    BoardEventSubscriber::class,
 ];
 ```
 
-## Database Setup
+### 7. Creating Application Services
 
-### Migration Example
-
-```php
-Schema::create('orders', function (Blueprint $table) {
-    $table->uuid('id')->primary();
-    $table->uuid('customer_id');
-    $table->string('status');
-    $table->json('items');
-    $table->integer('version')->default(0); // For optimistic locking
-    $table->timestamps();
-    
-    $table->index(['customer_id']);
-    $table->index(['status']);
-});
-```
-
-### Model Example
+Application services orchestrate domain operations:
 
 ```php
 <?php
 
-namespace App\Infrastructure\Models;
+declare(strict_types=1);
 
-use Lava83\DddFoundation\Infrastructure\Models\BaseModel;
+namespace App\Application\Services\Trello\Board;
 
-class OrderModel extends BaseModel
+use Illuminate\Support\Collection;
+use Lava83\DddFoundation\Domain\ValueObjects\Communication\Link;
+use App\Domain\TrelloManagement\Contracts\Board\BoardRepositoryInterface;
+use App\Domain\TrelloManagement\Contracts\Board\BoardServiceInterface;
+use App\Domain\TrelloManagement\Entities\Board;
+use App\Domain\TrelloManagement\ValueObjects\Identity\BoardId;
+
+class BoardApplicationService implements BoardServiceInterface
 {
-    protected $table = 'orders';
+    public function __construct(
+        private BoardRepositoryInterface $boardRepository,
+    ) {}
 
-    protected $fillable = [
-        'customer_id',
-        'status',
-        'items',
-    ];
-
-    public function casts(): array
+    public function listBoards(): Collection
     {
-        return array_merge(parent::casts(), [
-            'customer_id' => 'uuid',
-            'items' => 'array',
-        ]);
+        return $this->boardRepository->findAll();
+    }
+
+    public function board(string $boardId): Board
+    {
+        return $this->boardRepository->findOrFail(
+            BoardId::fromString($boardId)
+        );
+    }
+
+    public function createBoard(array $data): Board
+    {
+        $board = Board::create(
+            trelloId: BoardId::fromString($data['trello_id']),
+            name: $data['name'],
+            description: $data['description'],
+            isClosed: $data['is_closed'],
+            link: Link::fromString($data['link']),
+            shortUrl: Link::fromString($data['short_url']),
+            isSubscribed: $data['is_subscribed'],
+            closedAt: $data['closed_at'] ?? null,
+            lastActivityAt: $data['last_activity_at'] ?? null,
+            lastView: $data['last_view'] ?? null,
+        );
+
+        $this->boardRepository->save($board);
+
+        return $board;
+    }
+
+    public function updateBoard(string $boardId, array $data): Board
+    {
+        $board = $this->boardRepository->findOrFail(
+            BoardId::fromString($boardId)
+        );
+
+        $board->update(
+            name: $data['name'],
+            description: $data['description'],
+            isClosed: $data['is_closed'],
+            link: Link::fromString($data['link']),
+            shortUrl: Link::fromString($data['short_url']),
+            isSubscribed: $data['is_subscribed'],
+            closedAt: $data['closed_at'] ?? null,
+            lastActivityAt: $data['last_activity_at'] ?? null,
+            lastView: $data['last_view'] ?? null,
+        );
+
+        $this->boardRepository->save($board);
+
+        return $board;
     }
 }
 ```
 
-## Framework Integration
+### 8. Creating Value Objects
 
-### Service Provider Registration
+Value objects represent descriptive aspects of your domain:
 
-Register your entity mappers in the DddServiceProvider:
+#### Simple Date Range Value Object Example
 
 ```php
-$this->app->singleton(EntityMapperResolver::class, function () {
-    return new class extends EntityMapperResolver {
-        public function resolve(string $entityClass): EntityMapper
-        {
-            return match($entityClass) {
-                Order::class => new OrderMapper(),
-                User::class => new UserMapper(),
-                Product::class => new ProductMapper(),
-                default => throw new \InvalidArgumentException("No mapper found for {$entityClass}"),
-            };
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Shared\ValueObjects;
+
+use Carbon\CarbonImmutable;
+use Lava83\DddFoundation\Domain\ValueObjects\ValueObject;
+
+class DateRange extends ValueObject
+{
+    private function __construct(
+        private CarbonImmutable $startDate,
+        private CarbonImmutable $endDate,
+    ) {
+        $this->validate();
+    }
+
+    public static function create(
+        CarbonImmutable $startDate, 
+        CarbonImmutable $endDate
+    ): self {
+        return new self($startDate, $endDate);
+    }
+
+    public function startDate(): CarbonImmutable
+    {
+        return $this->startDate;
+    }
+
+    public function endDate(): CarbonImmutable
+    {
+        return $this->endDate;
+    }
+
+    public function contains(CarbonImmutable $date): bool
+    {
+        return $date->greaterThanOrEqualTo($this->startDate)
+            && $date->lessThanOrEqualTo($this->endDate);
+    }
+
+    public function overlaps(DateRange $other): bool
+    {
+        return $this->startDate->lessThanOrEqualTo($other->endDate)
+            && $other->startDate->lessThanOrEqualTo($this->endDate);
+    }
+
+    public function durationInDays(): int
+    {
+        return $this->startDate->diffInDays($this->endDate);
+    }
+
+    protected function validate(): void
+    {
+        if ($this->startDate->greaterThan($this->endDate)) {
+            throw new \InvalidArgumentException(
+                'Start date must be before or equal to end date'
+            );
         }
-    };
-});
+    }
+
+    public function toString(): string
+    {
+        return sprintf(
+            '%s to %s',
+            $this->startDate->format('Y-m-d'),
+            $this->endDate->format('Y-m-d')
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'start_date' => $this->startDate->toDateString(),
+            'end_date' => $this->endDate->toDateString(),
+        ];
+    }
+
+    public function equals(mixed $other): bool
+    {
+        if (!$other instanceof self) {
+            return false;
+        }
+
+        return $this->startDate->equalTo($other->startDate)
+            && $this->endDate->equalTo($other->endDate);
+    }
+}
 ```
 
-### Repository Binding
+#### Using Built-in Value Objects
 
 ```php
-$this->app->bind(
-    \App\Domain\Order\Contracts\OrderRepositoryInterface::class,
-    \App\Infrastructure\Repositories\OrderRepository::class
-);
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
+use Lava83\DddFoundation\Domain\ValueObjects\Communication\Email;
+use Lava83\DddFoundation\Domain\ValueObjects\Communication\Link;
+use Lava83\DddFoundation\Domain\ValueObjects\Data\Json;
+
+// UUID
+$userId = Uuid::generate();
+$userId = Uuid::fromString('550e8400-e29b-41d4-a716-446655440000');
+
+// MongoDB ObjectId (compatible with Trello IDs)
+$boardId = MongoObjectId::fromString('507f1f77bcf86cd799439011');
+
+// Email
+$email = Email::fromString('user@example.com');
+echo $email->toString(); // user@example.com
+
+// Link/URL
+$url = Link::fromString('https://example.com');
+echo $url->toString(); // https://example.com
+
+// JSON Data
+$json = Json::fromArray(['key' => 'value']);
+$data = $json->toArray();
 ```
 
-## Testing
+## Key Features Explained
 
-### Unit Tests
+### Automatic Event Dispatching
+
+When you save an aggregate through a repository, domain events are automatically dispatched:
+
+```php
+$board = Board::create(/* ... */);
+$board->update(/* ... */); // Records BoardUpdated event
+
+$boardRepository->save($board); 
+// 1. Saves to database
+// 2. Automatically dispatches all uncommitted events via Laravel's event system
+// 3. Clears uncommitted events from the aggregate
+```
+
+The `Repository` base class handles this through the `dispatchUncommittedEvents()` method, which uses Laravel's `Illuminate\Events\Dispatcher`.
+
+### Optimistic Locking
+
+All entities include automatic version tracking to prevent lost updates:
+
+```php
+// User A loads board
+$boardA = $boardRepository->find($boardId);
+$versionA = $boardA->version(); // version = 1
+
+// User B loads same board
+$boardB = $boardRepository->find($boardId);
+
+// User B updates and saves
+$boardB->update(/* ... */);
+$boardRepository->save($boardB); // version now = 2
+
+// User A tries to save
+$boardA->update(/* ... */);
+$boardRepository->save($boardA); 
+// Throws ConcurrencyException because version mismatch
+```
+
+### UUID Primary Keys
+
+Models automatically use UUIDs as primary keys by extending the framework's `Model` base class:
 
 ```php
 <?php
 
-namespace Tests\Domain\Order;
+namespace App\Infrastructure\Models\Trello\Board;
 
-use Tests\TestCase;
-use App\Domain\Order\Entities\Order;
+use Lava83\DddFoundation\Infrastructure\Models\Model;
 
-class OrderTest extends TestCase
+class BoardModel extends Model
 {
-    public function test_can_create_order(): void
-    {
-        $order = new Order(OrderId::generate(), CustomerId::generate());
-        
-        $this->assertEquals('pending', $order->status());
-        $this->assertTrue($order->isEmpty());
-    }
-
-    public function test_can_add_items(): void
-    {
-        $order = new Order(OrderId::generate(), CustomerId::generate());
-        $item = new OrderItem(ProductId::generate(), 'Product', 2, new Money(1000, 'USD'));
-        
-        $order->addItem($item);
-        
-        $this->assertFalse($order->isEmpty());
-        $this->assertEquals(2000, $order->calculateTotal()->amount);
-    }
+    protected $table = 'trello_boards';
+    protected $primaryKey = 'trello_id'; // Uses UUID/MongoObjectId
+    
+    protected $fillable = [
+        'trello_id',
+        'name',
+        'description',
+        // ...
+    ];
 }
 ```
 
-### Feature Tests
+### Transaction Support
+
+Repositories automatically wrap save operations in transactions:
+
+```php
+public function save(Board $board): void
+{
+    DB::transaction(fn() => $this->saveEntity($board));
+}
+```
+
+## Architecture & Layering
+
+### Recommended Project Structure
+
+```
+app/
+├── Application/                    # Application Layer
+│   ├── Controllers/               # API Controllers
+│   ├── Requests/                  # Form Requests
+│   ├── Resources/                 # API Resources
+│   └── Services/                  # Application Services
+│       └── Trello/
+│           ├── Board/
+│           │   ├── BoardApplicationService.php
+│           │   └── BoardSynchronizationService.php
+│           └── ...
+├── Domain/                        # Domain Layer
+│   └── TrelloManagement/
+│       ├── Contracts/            # Domain Interfaces
+│       │   ├── Board/
+│       │   │   ├── BoardRepositoryInterface.php
+│       │   │   └── BoardServiceInterface.php
+│       │   └── ...
+│       ├── Entities/             # Domain Entities & Aggregates
+│       │   ├── Board.php
+│       │   ├── BoardList.php
+│       │   ├── Card.php
+│       │   └── Member.php
+│       ├── Events/               # Domain Events
+│       │   ├── BoardCreated.php
+│       │   ├── BoardUpdated.php
+│       │   └── ...
+│       ├── Exceptions/           # Domain Exceptions
+│       └── ValueObjects/         # Domain Value Objects
+│           └── Identity/
+│               ├── BoardId.php
+│               └── MemberId.php
+└── Infrastructure/                # Infrastructure Layer
+    ├── Mappers/                  # Entity-Model Mappers
+    │   ├── EntityMapperResolver.php
+    │   └── Trello/
+    │       ├── BoardMapper.php
+    │       └── MemberMapper.php
+    ├── Models/                   # Eloquent Models
+    │   └── Trello/
+    │       ├── Board/
+    │       │   ├── BoardModel.php
+    │       │   └── BoardListModel.php
+    │       └── ...
+    ├── Providers/                # Service Providers
+    │   ├── RepositoriesServiceProvider.php
+    │   └── RelationServiceProvider.php
+    └── Repositories/             # Repository Implementations
+        └── Trello/
+            ├── EloquentBoardRepository.php
+            └── EloquentMemberRepository.php
+```
+
+### Layer Responsibilities
+
+**Domain Layer** (Pure PHP, no Laravel dependencies)
+- Business logic and rules
+- Entities and Aggregates
+- Domain events
+- Value Objects
+- Repository and Service contracts
+
+**Application Layer** (Minimal Laravel usage)
+- Application services (use cases)
+- Controllers
+- Request validation
+- Resource transformers
+- Use Laravel helpers like `collect()` when beneficial
+
+**Infrastructure Layer** (Full Laravel integration)
+- Eloquent models
+- Repository implementations
+- Entity-Model mappers
+- External service integrations
+- Database migrations
+
+## Service Provider Setup
+
+### Register Repositories
 
 ```php
 <?php
 
-namespace Tests\Feature\Order;
+namespace App\Infrastructure\Providers;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\ServiceProvider;
+use App\Domain\TrelloManagement\Contracts\Board\BoardRepositoryInterface;
+use App\Infrastructure\Repositories\Trello\EloquentBoardRepository;
 
-class CreateOrderTest extends TestCase
+class RepositoriesServiceProvider extends ServiceProvider
 {
-    use RefreshDatabase;
-
-    public function test_can_create_order_via_api(): void
+    public function register(): void
     {
-        $customer = CustomerModel::factory()->create();
-        $product = ProductModel::factory()->create(['stock_quantity' => 10]);
-
-        $response = $this->postJson('/api/orders', [
-            'customer_id' => $customer->id,
-            'items' => [
-                ['product_id' => $product->id, 'quantity' => 2],
-            ],
-        ]);
-
-        $response->assertStatus(201);
-        $this->assertDatabaseHas('orders', ['customer_id' => $customer->id]);
+        $this->app->bind(
+            BoardRepositoryInterface::class, 
+            EloquentBoardRepository::class
+        );
+        
+        // Register other repositories...
     }
 }
 ```
 
-## Development
+### Register Application Services
 
-### Code Quality Tools
+```php
+<?php
 
-```bash
-# Static analysis
-composer stan
-./vendor/bin/phpstan analyse
+namespace App\Application\Providers;
 
-# Code formatting
-composer pint-fix
-./vendor/bin/pint
+use Illuminate\Support\ServiceProvider;
+use App\Domain\TrelloManagement\Contracts\Board\BoardServiceInterface;
+use App\Application\Services\Trello\Board\BoardApplicationService;
 
-# Run tests
-composer test
-./vendor/bin/pest
-```
-
-### Build Scripts
-
-```json
+class ApplicationServiceProvider extends ServiceProvider
 {
-    "scripts": {
-        "stan": [
-            "./vendor/bin/phpstan analyse --memory-limit=5G --configuration=phpstan.neon --no-interaction"
-        ],
-        "pint": [
-            "./vendor/bin/pint --test"
-        ],
-        "pint-fix": [
-            "./vendor/bin/pint"
-        ],
-        "test": [
-            "./vendor/bin/pest"
-        ]
+    public function register(): void
+    {
+        $this->app->bind(
+            BoardServiceInterface::class,
+            BoardApplicationService::class
+        );
+        
+        // Register other services...
     }
 }
-```
-
-## Configuration
-
-### PHPStan Configuration
-
-```yaml
-# phpstan.neon
-includes:
-    - vendor/phpstan/phpstan/conf/bleedingEdge.neon
-    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
-parameters:
-    level: 8
-    phpVersion: 80200
-    paths:
-        - src
-    reportUnmatchedIgnoredErrors: false
 ```
 
 ## Best Practices
 
-### Domain Layer Guidelines
+### 1. Keep Domain Layer Pure
 
-- **Minimal Laravel Dependencies**: Only use Laravel helpers like `collect()`, `str()`
-- **Pure Business Logic**: No infrastructure concerns in domain layer
-- **Rich Domain Models**: Entities should contain business behavior
-- **Value Objects**: Use for all domain concepts (IDs, emails, money)
-- **Domain Events**: Record all significant business events
+Minimize Laravel dependencies in the domain layer:
 
-### Infrastructure Layer Guidelines
+```php
+// ✅ Good - Uses generic Collection from illuminate/support
+use Illuminate\Support\Collection;
 
-- **Mappers**: Always use entity mappers for domain ↔ model transformation
-- **Repository Pattern**: Implement repository contracts in infrastructure
-- **Event Publishing**: Let the base repository handle event publishing
-- **Optimistic Locking**: Always check version in mappers
+class Board extends Aggregate
+{
+    public function __construct(
+        // ...
+        protected Collection $lists,
+    ) {
+        parent::__construct();
+    }
+}
 
-### API-First Architecture
+// ❌ Avoid - Don't use Eloquent in domain layer
+use Illuminate\Database\Eloquent\Collection;
+```
 
-- **Thin Controllers**: Controllers should only orchestrate use cases
-- **Use Cases**: Business logic goes in application services
-- **DTOs**: Use Data Transfer Objects for API request/response
-- **Validation**: Business validation in domain, input validation in requests
+### 2. Use Helper Functions Sparingly
+
+Use Laravel helpers like `collect()` in domain when beneficial:
+
+```php
+public function activeBoards(): Collection
+{
+    return collect($this->boards)->filter(
+        fn(Board $board) => !$board->isClosed()
+    );
+}
+```
+
+### 3. Always Use Static Factory Methods
+
+Create aggregates through named constructors:
+
+```php
+// ✅ Good - Clear intent
+$board = Board::create($id, $name, $description, ...);
+
+// ❌ Avoid - Using new directly
+$board = new Board($id, $name, $description, ...);
+```
+
+### 4. Record Events for All State Changes
+
+```php
+public function update(/* params */): void
+{
+    $this->updateAggregateRoot(
+        [/* changes */],
+        BoardUpdated::class, // Always provide event class
+    );
+}
+```
+
+### 5. Use Transactions for Aggregate Saves
+
+Always wrap saves in transactions to ensure consistency:
+
+```php
+public function save(Board $board): void
+{
+    DB::transaction(fn() => $this->saveEntity($board));
+}
+```
+
+## Planned Features
+
+- ⏳ **Soft Deletes** - Soft delete support at entity, aggregate, and model layers
+- ⏳ **Additional Value Objects** - More built-in value objects (Money, Address, etc.)
+- ⏳ **Advanced Mapper Types** - Support for different mapping strategies
 
 ## Troubleshooting
 
-### Common Issues
+### "No mapper found for entity class"
 
-**"No mapper found for entity"**
-```php
-// Solution: Register mapper in DddServiceProvider
-return match($entityClass) {
-    YourEntity::class => new YourMapper(),
-    // ...
-};
-```
+Ensure you've registered the mapper in your `EntityMapperResolver`:
 
-**"Prefixed ID must contain underscore separator"**
 ```php
-// Solution: Set prefix in ID value objects
-class OrderId extends Id
+public function resolve(string $entityClass): EntityMapper
 {
-    protected string $prefix = 'order';
+    return match ($entityClass) {
+        YourEntity::class => app(YourEntityMapper::class),
+        // ...
+    };
 }
 ```
 
-**Domain events not firing**
-- Register listeners in `EventServiceProvider`
-- Save through repository (which publishes events)
-- Ensure events extend `BaseDomainEvent`
+### "Concurrency Exception"
 
-**Concurrency Exception on save**
+This indicates two processes tried to update the same aggregate simultaneously. Handle it gracefully:
+
 ```php
-// This is optimistic locking working correctly
 try {
-    $repository->save($entity);
+    $repository->save($board);
 } catch (ConcurrencyException $e) {
-    // Handle conflict appropriately
+    // Reload entity and retry, or notify user
+    $board = $repository->findOrFail($boardId);
+    // Reapply changes...
 }
 ```
+
+### Events Not Dispatching
+
+Ensure:
+1. You're calling `save()` on the repository (not directly on the model)
+2. Your event subscribers are registered in `EventServiceProvider`
+3. Events extend the framework's `DomainEvent` base class
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow DDD principles and existing code style
-4. Add tests for new functionality
-5. Run quality checks (`composer stan && composer pint`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+This is currently a private package. For questions or suggestions, contact the maintainer.
 
 ## License
 
-This package is open-sourced software licensed under the [MIT license](LICENSE).
+This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Support
+## Credits
 
-- **Issues**: [GitHub Issues](https://github.com/lava83/ddd-foundation/issues)
-- **Documentation**: [Full documentation and examples](docs/)
-
----
-
-**Built for enterprise Laravel applications following Domain-Driven Design principles.**
+Built with ❤️ by [lava83](https://github.com/lava83) for building scalable Laravel applications using Domain-Driven Design principles.
