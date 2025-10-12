@@ -30,7 +30,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
      */
     public function recordEvent(DomainEvent $event): void
     {
-        $this->domainEvents[] = $event;
+        $this->domainEvents->push($event);
     }
 
     /**
@@ -44,7 +44,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
 
     public function markEventsAsCommitted(): void
     {
-        $this->domainEvents = new Collection;
+        $this->domainEvents = collect();
     }
 
     public function hasUncommittedEvents(): bool
@@ -63,7 +63,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
         // or similar to reset events in a more generic way
         // in case we want to clone an aggregate root with events
         // that should not be cloned
-        $this->domainEvents = new Collection;
+        $this->domainEvents = collect();
     }
 
     /**
@@ -79,7 +79,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
     public function __wakeup(): void
     {
         // Reset events array after unserialization
-        $this->domainEvents = new Collection;
+        $this->domainEvents = collect();
     }
 
     /**

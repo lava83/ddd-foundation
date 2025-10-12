@@ -61,6 +61,8 @@ abstract class Entity
      */
     abstract public function id();
 
+    abstract public static function fromState(array $state): self;
+
     /**
      * Compare entities by ID for equality
      */

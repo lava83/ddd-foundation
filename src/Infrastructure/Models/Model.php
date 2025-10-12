@@ -21,6 +21,11 @@ class Model extends EloquentModel
 {
     use HasUuids;
 
+    public function getFillable(): array
+    {
+        return array_merge(['id', 'version'], $this->fillable);
+    }
+
     public function casts(): array
     {
         return [
