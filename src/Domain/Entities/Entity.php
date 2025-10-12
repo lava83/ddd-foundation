@@ -101,12 +101,23 @@ abstract class Entity
         $this->version = $version;
     }
 
+    /**
+     * Summary of hydrate
+     *
+     * @param  Model|array{created_at:string, updated_at?:string, version:int}  $model
+     */
     public function hydrate(
-        Model $model,
+        Model|array $model,
     ): void {
-        $this->createdAt = CarbonImmutable::parse($model->created_at);
-        $this->updatedAt = $model->updated_at ? CarbonImmutable::parse($model->updated_at) : null;
-        $this->version = $model->version;
+        if (is_array($model)) {
+            $this->createdAt = CarbonImmutable::parse($model['created_at']);
+            $this->updatedAt = isset($model['updated_at']) ? CarbonImmutable::parse($model['updated_at']) : null;
+            $this->version = $model['version'];
+        } else {
+            $this->createdAt = CarbonImmutable::parse($model->created_at);
+            $this->updatedAt = $model->updated_at ? CarbonImmutable::parse($model->updated_at) : null;
+            $this->version = $model->version;
+        }
     }
 
     /**
