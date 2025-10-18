@@ -61,7 +61,7 @@ abstract class Entity
      */
     abstract public function id();
 
-    abstract public static function fromState(array $state): self;
+    abstract public static function fromState(Model $state): self;
 
     /**
      * Compare entities by ID for equality
@@ -101,23 +101,12 @@ abstract class Entity
         $this->version = $version;
     }
 
-    /**
-     * Summary of hydrate
-     *
-     * @param  Model|array{created_at:string, updated_at?:string, version:int}  $model
-     */
     public function hydrate(
-        Model|array $model,
+        Model $model,
     ): void {
-        if (is_array($model)) {
-            $this->createdAt = CarbonImmutable::parse($model['created_at']);
-            $this->updatedAt = isset($model['updated_at']) ? CarbonImmutable::parse($model['updated_at']) : null;
-            $this->version = $model['version'];
-        } else {
-            $this->createdAt = CarbonImmutable::parse($model->created_at);
-            $this->updatedAt = $model->updated_at ? CarbonImmutable::parse($model->updated_at) : null;
-            $this->version = $model->version;
-        }
+        $this->createdAt = CarbonImmutable::parse($model->created_at);
+        $this->updatedAt = $model->updated_at ? CarbonImmutable::parse($model->updated_at) : null;
+        $this->version = $model->version;
     }
 
     /**
