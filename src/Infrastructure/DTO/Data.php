@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\DTO;
 
-abstract class Data
+use Spatie\LaravelData\Data as SpatieData;
+
+abstract class Data extends SpatieData
 {
-    public function toArray(): array
-    {
-        return get_object_vars($this);
-    }
+    /**
+     * @return array<string, mixed>
+     */
+    abstract public function mapToPersistenceLayerArray(): array;
 }
