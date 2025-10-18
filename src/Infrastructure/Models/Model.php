@@ -23,7 +23,7 @@ class Model extends EloquentModel
 
     public function getFillable(): array
     {
-        return array_merge(['id', 'version'], $this->fillable);
+        return array_merge(['id', 'version', 'created_at', 'updated_at'], $this->fillable);
     }
 
     public function casts(): array
