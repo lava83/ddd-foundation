@@ -20,7 +20,7 @@ abstract class Repository
      */
     protected string $aggregateClass;
 
-    public function __construct(private EntityMapperResolver $mapperResolver)
+    public function __construct(protected EntityMapperResolver $mapperResolver)
     {
         // @todo implement ensuring of aggregate class being set and is a subclass of Aggregate
     }
