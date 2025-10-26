@@ -115,7 +115,7 @@ class Json implements JsonSerializable
 
     public function values(): Collection
     {
-        return $this->data->values();
+        return collect($this->data->all());
     }
 
     public function equals(self $other): bool
@@ -123,9 +123,9 @@ class Json implements JsonSerializable
         return $this->value === $other->value;
     }
 
-    public function jsonSerialize(): string
+    public function jsonSerialize(): array
     {
-        return $this->value;
+        return $this->data->toArray();
     }
 
     public function __toString(): string
