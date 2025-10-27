@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\Repositories;
 
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\Entities\Entity;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
@@ -44,6 +46,35 @@ abstract class Repository
         $this->syncEntityFromModel($entity, $model);
 
         return $model;
+    }
+
+    protected function deleteEntity(Entity|Aggregate $entity): void
+    {
+        $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
+
+        if (! $model->delete()) {
+            throw new CantSaveModel('Failed to delete entity');
+        }
+    }
+
+    protected function deleteEntities(Collection $entities): void
+    {
+        $entities->each(fn (Entity $entity) => $this->deleteEntity($entity));
+    }
+
+    protected function deleteRelatedEntity(Entity|Aggregate $entity, string $relation, int|string $relatedId): void
+    {
+        $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
+
+        $related = $model->$relation()->find($relatedId);
+
+        if ($related instanceof Model) {
+            if (! $related->delete()) {
+                throw new CantSaveModel("Failed to delete related entity via relation {$relation}");
+            }
+        } else {
+            throw new InvalidArgumentException("Relation {$relation} is not a valid Eloquent relation");
+        }
     }
 
     protected function dispatchUncommittedEvents(Aggregate $entity): void
