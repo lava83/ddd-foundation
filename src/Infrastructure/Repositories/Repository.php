@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Lava83\DddFoundation\Infrastructure\Repositories;
 
 use Illuminate\Support\Collection;
-use InvalidArgumentException;
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\Entities\Entity;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper;
 use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapperResolver;
+use Lava83\DddFoundation\Infrastructure\Exceptions\CantDeleteModel;
+use Lava83\DddFoundation\Infrastructure\Exceptions\CantDeleteRelatedModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Models\Model;
@@ -53,7 +54,7 @@ abstract class Repository
         $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
 
         if (! $model->delete()) {
-            throw new CantSaveModel('Failed to delete entity');
+            throw new CantDeleteModel('Failed to delete entity');
         }
     }
 
@@ -70,10 +71,10 @@ abstract class Repository
 
         if ($related instanceof Model) {
             if (! $related->delete()) {
-                throw new CantSaveModel("Failed to delete related entity via relation {$relation}");
+                throw new CantDeleteRelatedModel("Failed to delete related entity via relation {$relation}");
             }
         } else {
-            throw new InvalidArgumentException("Relation {$relation} is not a valid Eloquent relation");
+            throw new CantDeleteRelatedModel("Relation {$relation} is not a valid Eloquent relation");
         }
     }
 
