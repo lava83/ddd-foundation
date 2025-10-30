@@ -6,10 +6,10 @@ namespace Lava83\DddFoundation\Domain\Entities;
 
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
-use Lava83\DddFoundation\Infrastructure\Models\Model;
 use LogicException;
 use ReflectionClass;
 

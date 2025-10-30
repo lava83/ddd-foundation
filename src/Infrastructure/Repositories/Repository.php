@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Entities\Aggregate;
 use Lava83\DddFoundation\Domain\Entities\Entity;
@@ -13,7 +14,6 @@ use Lava83\DddFoundation\Infrastructure\Exceptions\CantDeleteModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantDeleteRelatedModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
-use Lava83\DddFoundation\Infrastructure\Models\Model;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
 
 abstract class Repository
