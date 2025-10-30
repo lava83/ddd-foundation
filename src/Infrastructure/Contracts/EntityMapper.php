@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
 use Lava83\DddFoundation\Domain\Entities\Entity;
-use Lava83\DddFoundation\Infrastructure\Models\Model;
 
 interface EntityMapper
 {
