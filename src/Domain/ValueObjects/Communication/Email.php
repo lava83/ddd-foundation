@@ -200,7 +200,7 @@ class Email implements JsonSerializable
             ->title();
     }
 
-    public function encrypted(): Stringable
+    public function encrypt(): Stringable
     {
         return $this->value->encrypt();
     }
