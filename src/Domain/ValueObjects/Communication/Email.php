@@ -43,11 +43,13 @@ class Email implements JsonSerializable
 
         $validator = Validator::make(
             ['email' => $email],
-            ['email' => [
-                'required',
-                'email:rfc',
-                fn (string $attribute, string $value, Closure $fail) => $this->validateBusinessRules(str($value), $fail),
-            ]]
+            [
+                'email' => [
+                    'required',
+                    'email:rfc',
+                    fn (string $attribute, string $value, Closure $fail) => $this->validateBusinessRules(str($value), $fail),
+                ],
+            ]
         );
 
         if ($validator->fails()) {
@@ -196,6 +198,11 @@ class Email implements JsonSerializable
     {
         return $this->localPart->replace(['.', '_', '-', '+'], ' ')
             ->title();
+    }
+
+    public function encrypted(): Stringable
+    {
+        return $this->value->encrypt();
     }
 
     public function generateUsername(): Stringable
