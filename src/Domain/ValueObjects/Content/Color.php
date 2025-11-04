@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lava83\DddFoundation\Domain\ValueObjects\Content;
+
+use Illuminate\Support\Stringable;
+use Illuminate\Validation\Rule;
+use JsonSerializable;
+use Lava83\DddFoundation\Domain\ValueObjects\Content\Enums\ColorEnum;
+
+class Color implements JsonSerializable
+{
+    private Stringable $value;
+
+    public function __construct(string $color)
+    {
+        $color = str($color)->lower()->trim();
+        $this->validate($color);
+        $this->value = $color;
+    }
+
+    public static function fromString(string $color): static
+    {
+        return new static($color);
+    }
+
+    public function jsonSerialize(): string
+    {
+        return (string) $this->value;
+    }
+
+    public function toString(): string
+    {
+        return (string) $this->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    private function validate(Stringable $color): void
+    {
+        validator()->make(
+            ['color' => $color],
+            [
+                'color' => [
+                    'required',
+                    Rule::enum(ColorEnum::class),
+                ],
+            ]
+        )->validate();
+    }
+}
