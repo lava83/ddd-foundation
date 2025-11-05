@@ -17,7 +17,7 @@ abstract class EntityMapper implements EntityMapperContract
     {
         $model = app($modelClass)->findOr($entity->id(), ['*'], fn () => app($modelClass));
 
-        $model->fill($data);
+        $model->fill($this->mergeWithDefaultData($entity, $data));
 
         return $model;
     }
@@ -28,5 +28,18 @@ abstract class EntityMapper implements EntityMapperContract
     protected function findOrCreateModel(Entity $entity, string $modelClass): Model
     {
         return app($modelClass)->findOr($entity->id(), ['*'], fn () => app($modelClass));
+    }
+
+    private function mergeWithDefaultData(Entity $entity, array $data): array
+    {
+        return array_merge(
+            [
+                'id' => $entity->id(),
+                'version' => $entity->version(),
+                'created_at' => $entity->createdAt(),
+                'updated_at' => $entity->updatedAt(),
+            ],
+            $data
+        );
     }
 }
