@@ -13,11 +13,11 @@ abstract class EntityMapper implements EntityMapperContract
     /**
      * @param  array<string, mixed>  $data
      */
-    protected function findOrCreateModelFillData(Entity $entity, string $modelClass, array $data): Model
+    protected static function findOrCreateModelFillData(Entity $entity, string $modelClass, array $data): Model
     {
-        $model = app($modelClass)->findOr($entity->id(), ['*'], fn () => app($modelClass));
+        $model = static::findOrCreateModel($entity, $modelClass);
 
-        $model->fill($this->mergeWithDefaultData($entity, $data));
+        $model->fill(static::mergeWithDefaultData($entity, $data));
 
         return $model;
     }
@@ -25,12 +25,12 @@ abstract class EntityMapper implements EntityMapperContract
     /**
      * @param  class-string<Model>  $modelClass
      */
-    protected function findOrCreateModel(Entity $entity, string $modelClass): Model
+    protected static function findOrCreateModel(Entity $entity, string $modelClass): Model
     {
         return app($modelClass)->findOr($entity->id(), ['*'], fn () => app($modelClass));
     }
 
-    private function mergeWithDefaultData(Entity $entity, array $data): array
+    private static function mergeWithDefaultData(Entity $entity, array $data): array
     {
         return array_merge(
             [
