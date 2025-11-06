@@ -56,6 +56,10 @@ abstract class Repository
         if (! $model->delete()) {
             throw new CantDeleteModel('Failed to delete entity');
         }
+
+        if ($entity instanceof Aggregate) {
+            $this->dispatchUncommittedEvents($entity);
+        }
     }
 
     protected function deleteEntities(Collection $entities): void
@@ -75,6 +79,10 @@ abstract class Repository
             }
         } else {
             throw new CantDeleteRelatedModel("Relation {$relation} is not a valid Eloquent relation");
+        }
+
+        if ($entity instanceof Aggregate) {
+            $this->dispatchUncommittedEvents($entity);
         }
     }
 
