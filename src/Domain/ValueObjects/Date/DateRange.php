@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Domain\ValueObjects\Date;
 
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Exception;
@@ -59,8 +58,8 @@ final class DateRange implements JsonSerializable
         $now = CarbonImmutable::now();
 
         return new static(
-            $now->startOfWeek(Carbon::MONDAY),
-            $now->endOfWeek(Carbon::SUNDAY)
+            $now->startOfWeek(CarbonInterface::MONDAY),
+            $now->endOfWeek(CarbonInterface::SUNDAY)
         );
     }
 
@@ -81,6 +80,36 @@ final class DateRange implements JsonSerializable
         return new static(
             $now->startOfYear(),
             $now->endOfYear()
+        );
+    }
+
+    public static function previousWeek(): static
+    {
+        $now = CarbonImmutable::now();
+
+        return new static(
+            $now->subWeek()->startOfWeek(CarbonInterface::MONDAY),
+            $now->subWeek()->endOfWeek(CarbonInterface::SUNDAY)
+        );
+    }
+
+    public static function previousMonth(): static
+    {
+        $now = CarbonImmutable::now();
+
+        return new static(
+            $now->subMonth()->startOfMonth(),
+            $now->subMonth()->endOfMonth()
+        );
+    }
+
+    public static function previousYear(): static
+    {
+        $now = CarbonImmutable::now();
+
+        return new static(
+            $now->subYear()->startOfYear(),
+            $now->subYear()->endOfYear()
         );
     }
 
