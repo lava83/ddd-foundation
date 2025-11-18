@@ -123,6 +123,16 @@ class DateRange implements JsonSerializable
         );
     }
 
+    public static function previousPeriodOf(DateRange $dateRange): static
+    {
+        $durationDays = $dateRange->durationInDays();
+
+        return new static(
+            $dateRange->startDate()->subDays((int) $durationDays + 1),
+            $dateRange->startDate()->subDay()
+        );
+    }
+
     public function startDate(): CarbonImmutable
     {
         return $this->startDate;
