@@ -10,7 +10,7 @@ use Exception;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-final class DateRange implements JsonSerializable
+class DateRange implements JsonSerializable
 {
     private CarbonImmutable $startDate;
 
@@ -135,7 +135,7 @@ final class DateRange implements JsonSerializable
 
     public function durationInDays(): float
     {
-        return floor($this->startDate->diffInDays($this->endDate) + 1);
+        return floor($this->startDate->diffInDays($this->endDate));
     }
 
     public function durationInWeeks(): int
