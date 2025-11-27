@@ -24,7 +24,10 @@ abstract class Model extends EloquentModel
     use HasUuids;
     use Filterable;
 
-    abstract public function allowedFilters(): AllowedFilterList;
+    public function allowedFilters(): ?AllowedFilterList
+    {
+        return null;
+    }
 
     public function getFillable(): array
     {
