@@ -10,9 +10,9 @@ use Illuminate\Support\Stringable;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 
-class Email implements JsonSerializable
+class Email implements JsonSerializable, \Stringable
 {
-    private Stringable $value;
+    private readonly Stringable $value;
 
     private Stringable $localPart;
 
@@ -131,7 +131,7 @@ class Email implements JsonSerializable
         if ($localLength <= 2) {
             $obfuscatedLocal = str('*')->repeat($localLength);
         } else {
-            $obfuscatedLocal = str($this->localPart[0])->append((string) str('*')->repeat($localLength - 2))->append((string) $this->localPart[-1]);
+            $obfuscatedLocal = str($this->localPart[0])->append((string) str('*')->repeat($localLength - 2))->append($this->localPart[-1]);
         }
 
         return str($obfuscatedLocal.'@'.$this->domain);
@@ -221,7 +221,7 @@ class Email implements JsonSerializable
     {
         $hash = md5((string) $this->value->lower()->trim());
 
-        return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d={$default}";
+        return sprintf('https://www.gravatar.com/avatar/%s?s=%d&d=%s', $hash, $size, $default);
     }
 
     /**

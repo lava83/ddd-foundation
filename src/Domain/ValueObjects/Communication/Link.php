@@ -7,8 +7,9 @@ namespace Lava83\DddFoundation\Domain\ValueObjects\Communication;
 use Illuminate\Support\Stringable;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
+use Stringable as StringableContract;
 
-class Link implements JsonSerializable
+class Link implements JsonSerializable, StringableContract
 {
     private Stringable $value;
 

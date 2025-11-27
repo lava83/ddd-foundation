@@ -69,7 +69,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
     public function uncommittedEvents(): Collection
     {
         // Return a copy of the events to prevent external modification
-        return $this->domainEvents->map(fn (DomainEvent $event) => clone $event);
+        return $this->domainEvents->map(fn (DomainEvent $event): DomainEvent => clone $event);
     }
 
     public function markEventsAsCommitted(): void
@@ -105,18 +105,16 @@ abstract class Aggregate extends Entity implements AggregateRoot
      */
     public function eventSummary(): Collection
     {
-        return $this->domainEvents->map(function (DomainEvent $event) {
-            return [
-                'event_name' => $event->eventName(),
-                'aggregate_id' => $event->aggregateId()->value(),
-                'occurred_on' => $event->occurredOn()->format(DateTimeImmutable::ATOM),
-            ];
-        });
+        return $this->domainEvents->map(fn(DomainEvent $event): array => [
+            'event_name' => $event->eventName(),
+            'aggregate_id' => $event->aggregateId()->value(),
+            'occurred_on' => $event->occurredOn()->format(DateTimeImmutable::ATOM),
+        ]);
     }
 
     public function eventByType(string $eventName): ?DomainEvent
     {
-        return $this->domainEvents->first(fn (DomainEvent $event) => $event->eventName() === $eventName) ?? null;
+        return $this->domainEvents->first(fn (DomainEvent $event): bool => $event->eventName() === $eventName) ?? null;
     }
 
     /**
@@ -124,7 +122,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
      */
     public function clearEventsOfType(string $eventName): void
     {
-        $this->domainEvents = $this->domainEvents->filter(fn (DomainEvent $event) => $event->eventName() !== $eventName);
+        $this->domainEvents = $this->domainEvents->filter(fn (DomainEvent $event): bool => $event->eventName() !== $eventName);
     }
 
     /**
@@ -132,7 +130,7 @@ abstract class Aggregate extends Entity implements AggregateRoot
      */
     public function countEventsOfType(string $eventName): int
     {
-        return $this->domainEvents->filter(fn (DomainEvent $event) => $event->eventName() === $eventName)->count();
+        return $this->domainEvents->filter(fn (DomainEvent $event): bool => $event->eventName() === $eventName)->count();
     }
 
     /**
@@ -153,13 +151,13 @@ abstract class Aggregate extends Entity implements AggregateRoot
 
         if ($eventClass !== null) {
             if (! is_a($eventClass, DomainEvent::class, true)) {
-                throw new LogicException("Event class {$eventClass} must implement DomainEvent interface");
+                throw new LogicException(sprintf('Event class %s must implement DomainEvent interface', $eventClass));
             }
 
             $event = new $eventClass($this->id(), $changesCollection);
         }
 
-        if ($event) {
+        if ($event instanceof DomainEvent) {
             $this->recordEvent($event);
         }
     }

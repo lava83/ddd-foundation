@@ -80,10 +80,10 @@ abstract class Repository
 
         if ($related instanceof Model) {
             if (! $related->delete()) {
-                throw new CantDeleteRelatedModel("Failed to delete related entity via relation {$relation}");
+                throw new CantDeleteRelatedModel('Failed to delete related entity via relation ' . $relation);
             }
         } else {
-            throw new CantDeleteRelatedModel("Relation {$relation} is not a valid Eloquent relation");
+            throw new CantDeleteRelatedModel(sprintf('Relation %s is not a valid Eloquent relation', $relation));
         }
 
         if ($entity instanceof Aggregate) {
@@ -108,7 +108,7 @@ abstract class Repository
 
         if ($model->version !== $expectedDatabaseVersion) {
             throw new ConcurrencyException(
-                "Entity {$entity->id()->value()} was modified by another process. Expected version: $expectedDatabaseVersion, Actual version: $model->version",
+                sprintf('Entity %s was modified by another process. Expected version: %d, Actual version: %d', $entity->id()->value(), $expectedDatabaseVersion, $model->version),
             );
         }
     }

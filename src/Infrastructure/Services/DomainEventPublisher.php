@@ -8,7 +8,7 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Collection;
 use Lava83\DddFoundation\Domain\Contracts\DomainEvent;
 
-final class DomainEventPublisher
+final readonly class DomainEventPublisher
 {
     public function __construct(
         private Dispatcher $dispatcher,

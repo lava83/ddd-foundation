@@ -8,8 +8,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Fluent;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
+use Stringable;
 
-class Json implements JsonSerializable
+class Json implements JsonSerializable, Stringable
 {
     private readonly Fluent $data;
 
@@ -142,6 +143,7 @@ class Json implements JsonSerializable
             if (! isset($current[$nestedKey]) || ! is_array($current[$nestedKey])) {
                 return;
             }
+
             $current = &$current[$nestedKey];
         }
 

@@ -12,12 +12,13 @@ use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 use LogicException;
 use ReflectionClass;
+use Stringable;
 
 /**
  * Base class for all entities (both aggregate roots and child entities)
  * Contains common entity functionality without domain event handling
  */
-abstract class Entity
+abstract class Entity implements Stringable
 {
     /** @var Collection<string, mixed> */
     protected Collection $dirty;
@@ -133,7 +134,7 @@ abstract class Entity
      */
     public function isRecentlyUpdated(): bool
     {
-        if (! $this->updatedAt) {
+        if (!$this->updatedAt instanceof CarbonImmutable) {
             return false;
         }
 
@@ -170,7 +171,7 @@ abstract class Entity
     {
         $errors = [];
 
-        if (! $this->id()->value()) {
+        if ($this->id()->value() === '' || $this->id()->value() === '0') {
             $errors[] = 'Entity must have an ID';
         }
 
@@ -182,7 +183,7 @@ abstract class Entity
      */
     public function isValid(): bool
     {
-        return empty($this->validate());
+        return $this->validate() === [];
     }
 
     /**
@@ -246,8 +247,8 @@ abstract class Entity
             $currentValue = $this->$property;
 
             if ($this->hasChanged($currentValue, $newValue)) {
-                $this->dirty->put("old_{$property}", $currentValue);
-                $this->dirty->put("new_{$property}", $newValue);
+                $this->dirty->put('old_' . $property, $currentValue);
+                $this->dirty->put('new_' . $property, $newValue);
             }
         }
 
@@ -260,18 +261,14 @@ abstract class Entity
             return (string) $current !== (string) $new;
         }
 
-        if ($current === null || $new === null) {
-            return $current !== $new;
-        }
-
         return $current !== $new;
     }
 
     protected function applyChangesByPropertyMap(array $propertyMap, Collection $changes): void
     {
         foreach ($propertyMap as $property => $setter) {
-            if ($changes->has("new_{$property}")) {
-                $setter($changes->get("new_{$property}"));
+            if ($changes->has('new_' . $property)) {
+                $setter($changes->get('new_' . $property));
             }
         }
     }
@@ -312,7 +309,7 @@ abstract class Entity
                 continue;
             }
 
-            $changeKey = "new_{$propertyName}";
+            $changeKey = 'new_' . $propertyName;
 
             if (! $changes->has($changeKey)) {
                 continue;

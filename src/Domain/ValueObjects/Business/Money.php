@@ -7,11 +7,11 @@ namespace Lava83\DddFoundation\Domain\ValueObjects\Business;
 use InvalidArgumentException;
 use JsonSerializable;
 
-class Money implements JsonSerializable
+class Money implements JsonSerializable, \Stringable
 {
-    private float $amount;
+    private readonly float $amount;
 
-    private string $currency;
+    private readonly string $currency;
 
     public function __construct(float $amount, string $currency)
     {

@@ -9,12 +9,13 @@ use Carbon\CarbonInterface;
 use Exception;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
+use Stringable;
 
-class DateRange implements JsonSerializable
+class DateRange implements JsonSerializable, Stringable
 {
-    private CarbonImmutable $startDate;
+    private readonly CarbonImmutable $startDate;
 
-    private CarbonImmutable $endDate;
+    private readonly CarbonImmutable $endDate;
 
     public function __construct(CarbonInterface $startDate, CarbonInterface $endDate)
     {
@@ -41,7 +42,7 @@ class DateRange implements JsonSerializable
                 CarbonImmutable::parse($startDate),
                 CarbonImmutable::parse($endDate)
             );
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw new ValidationException('Invalid date format provided');
         }
     }
@@ -177,6 +178,7 @@ class DateRange implements JsonSerializable
             if ($current->isWeekday()) {
                 $businessDays++;
             }
+
             $current = $current->addDay();
         }
 
@@ -202,8 +204,11 @@ class DateRange implements JsonSerializable
 
     public function touches(DateRange $other): bool
     {
-        return $this->endDate->addDay()->startOfDay()->eq($other->startDate->startOfDay()) ||
-            $this->startDate->startOfDay()->eq($other->endDate->addDay()->startOfDay());
+        if ($this->endDate->addDay()->startOfDay()->eq($other->startDate->startOfDay())) {
+            return true;
+        }
+
+        return $this->startDate->startOfDay()->eq($other->endDate->addDay()->startOfDay());
     }
 
     public function merge(DateRange $other): DateRange
@@ -340,6 +345,7 @@ class DateRange implements JsonSerializable
             if ($current->isWeekday()) {
                 $dates[] = $current->toDateString();
             }
+
             $current = $current->addDay();
         }
 

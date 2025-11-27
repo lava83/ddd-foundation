@@ -13,20 +13,17 @@ use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 
 abstract class DomainEvent implements DomainEventContract
 {
-    private CarbonImmutable $occurredOn;
-
-    private int $eventVersion;
+    private readonly CarbonImmutable $occurredOn;
 
     /**
      * @param  Collection<string, mixed>  $eventData
      */
     public function __construct(
         /** @todo here we expect only an Id not the types of it */
-        private Uuid|MongoObjectId $aggregateId,
-        private Collection $eventData = new Collection(),
-        int $eventVersion = 1
+        private readonly Uuid|MongoObjectId $aggregateId,
+        private readonly Collection $eventData = new Collection(),
+        private readonly int $eventVersion = 1
     ) {
-        $this->eventVersion = $eventVersion;
         $this->occurredOn = CarbonImmutable::now();
     }
 

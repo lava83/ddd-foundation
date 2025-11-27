@@ -27,7 +27,7 @@ abstract class Model extends EloquentModel
         return array_merge(['id', 'version', 'created_at', 'updated_at'], $this->fillable);
     }
 
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'created_at' => 'datetime',

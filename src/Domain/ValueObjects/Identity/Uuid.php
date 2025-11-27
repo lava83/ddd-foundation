@@ -9,13 +9,15 @@ use JsonSerializable;
 use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 use Ramsey\Uuid\Uuid as RamseyUuid;
 use Ramsey\Uuid\UuidInterface;
+use Stringable;
 
 // @todo this is only a base class without specification of UUID or whatever.
 
-class Uuid implements JsonSerializable
+class Uuid implements JsonSerializable, Stringable
 {
     protected string $prefix = '';
-    private UuidInterface $value;
+
+    private readonly UuidInterface $value;
 
     final public function __construct(string $value)
     {
@@ -107,7 +109,7 @@ class Uuid implements JsonSerializable
      */
     public static function fromArray(array $values): array
     {
-        return array_map(fn (string $value) => new static($value), $values);
+        return array_map(fn (string $value): static => new static($value), $values);
     }
 
     /**
@@ -117,7 +119,7 @@ class Uuid implements JsonSerializable
      */
     public static function toStringArray(array $ids): array
     {
-        return array_map(fn (Uuid $id) => $id->value(), $ids);
+        return array_map(fn (Uuid $id): string => $id->value(), $ids);
     }
 
     public function value(): string

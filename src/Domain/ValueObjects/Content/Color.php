@@ -9,9 +9,9 @@ use Illuminate\Validation\Rule;
 use JsonSerializable;
 use Lava83\DddFoundation\Domain\ValueObjects\Content\Enums\ColorEnum;
 
-class Color implements JsonSerializable
+class Color implements JsonSerializable, \Stringable
 {
-    private Stringable $value;
+    private readonly Stringable $value;
 
     public function __construct(string $color)
     {

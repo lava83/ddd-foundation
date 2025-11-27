@@ -12,8 +12,9 @@ use Lava83\DddFoundation\Domain\Exceptions\ValidationException;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumber as LibphonenumberPhoneNumber;
 use libphonenumber\PhoneNumberUtil;
+use Stringable as StringableContract;
 
-class Phonenumber implements JsonSerializable
+class Phonenumber implements JsonSerializable, StringableContract
 {
     private Stringable $value;
 
@@ -127,20 +128,20 @@ class Phonenumber implements JsonSerializable
     ): void {
         try {
             $this->numberProto($value);
-        } catch (NumberParseException $e) {
-            $fail("Failed to parse phone number: {$e->getMessage()}");
+        } catch (NumberParseException $numberParseException) {
+            $fail('Failed to parse phone number: ' . $numberParseException->getMessage());
         }
     }
 
     private function numberProto(string $value): LibphonenumberPhoneNumber
     {
-        return once(function () use ($value) {
+        return once(function () use ($value): LibphonenumberPhoneNumber {
             $phoneNumberUtil = PhoneNumberUtil::getInstance();
 
             try {
                 return $phoneNumberUtil->parse($value);
-            } catch (NumberParseException $e) {
-                throw new ValidationException("Failed to parse phone number: {$e->getMessage()}");
+            } catch (NumberParseException $numberParseException) {
+                throw new ValidationException('Failed to parse phone number: ' . $numberParseException->getMessage());
             }
         });
     }
