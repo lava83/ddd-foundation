@@ -43,6 +43,7 @@
     "require": {
         "laravel/framework": "^12.24",
         "giggsey/libphonenumber-for-php": "^9.0",
-        "spatie/laravel-data": "^4.18"
+        "spatie/laravel-data": "^4.18",
+        "indexzer0/eloquent-filtering": "^2.2"
     }
 }

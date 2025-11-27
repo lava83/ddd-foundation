@@ -6,11 +6,12 @@ namespace Lava83\DddFoundation\Infrastructure\Models;
 
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Carbon;
+use IndexZer0\EloquentFiltering\Filter\Contracts\AllowedFilterList;
+use IndexZer0\EloquentFiltering\Filter\Traits\Filterable;
 use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
 
 /**
- * @property int $version
- *
+ * @property int $version *
  * @property-read Carbon $created_at
  * @property-read ?Carbon $updated_at
  *
@@ -21,6 +22,9 @@ use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
 abstract class Model extends EloquentModel
 {
     use HasUuids;
+    use Filterable;
+
+    abstract public function allowedFilters(): AllowedFilterList;
 
     public function getFillable(): array
     {
