@@ -33,6 +33,11 @@ class Phonenumber implements JsonSerializable
         $this->parseNumberParts($number);
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->value;
+    }
+
     public function value(): Stringable
     {
         return $this->value;
@@ -51,11 +56,6 @@ class Phonenumber implements JsonSerializable
     public function subscriberNumber(): Stringable
     {
         return $this->subscriberNumber;
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->value;
     }
 
     /**

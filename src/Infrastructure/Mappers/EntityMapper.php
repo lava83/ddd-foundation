@@ -11,13 +11,14 @@ use Lava83\DddFoundation\Infrastructure\Contracts\EntityMapper as EntityMapperCo
 abstract class EntityMapper implements EntityMapperContract
 {
     /**
+     * @param  class-string<Model>  $modelClass
      * @param  array<string, mixed>  $data
      */
     protected static function findOrCreateModelFillData(Entity $entity, string $modelClass, array $data): Model
     {
         $model = static::findOrCreateModel($entity, $modelClass);
 
-        $model->fill(static::mergeWithDefaultData($entity, $data));
+        $model->fill(self::mergeWithDefaultData($entity, $data));
 
         return $model;
     }

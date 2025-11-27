@@ -24,6 +24,16 @@ class DateRange implements JsonSerializable
         $this->validate();
     }
 
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s to %s (%d days)',
+            $this->startDate->toDateString(),
+            $this->endDate->toDateString(),
+            $this->durationInDays()
+        );
+    }
+
     public static function fromString(string $startDate, string $endDate): static
     {
         try {
@@ -291,16 +301,6 @@ class DateRange implements JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->toArray();
-    }
-
-    public function __toString(): string
-    {
-        return sprintf(
-            '%s to %s (%d days)',
-            $this->startDate->toDateString(),
-            $this->endDate->toDateString(),
-            $this->durationInDays()
-        );
     }
 
     public function format(string $format = 'Y-m-d'): string

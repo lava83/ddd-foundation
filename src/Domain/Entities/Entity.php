@@ -19,10 +19,11 @@ use ReflectionClass;
  */
 abstract class Entity
 {
+    /** @var Collection<string, mixed> */
     protected Collection $dirty;
 
     public function __construct(
-        protected CarbonImmutable $createdAt = new CarbonImmutable,
+        protected CarbonImmutable $createdAt = new CarbonImmutable(),
         protected ?CarbonImmutable $updatedAt = null,
         protected int $version = 0,
     ) {
@@ -55,11 +56,9 @@ abstract class Entity
      * Get the entity's unique identifier
      * Must be implemented by concrete entities
      *
-     * @return Uuid|MongoObjectId
-     *
      * @todo here we expect only an Id not the types of it
      */
-    abstract public function id();
+    abstract public function id(): Uuid|MongoObjectId;
 
     abstract public static function fromState(Model $state): self;
 
@@ -68,7 +67,7 @@ abstract class Entity
      */
     public function equals(self $other): bool
     {
-        if (get_class($this) !== get_class($other)) {
+        if ($other::class !== static::class) {
             return false;
         }
 
@@ -94,11 +93,6 @@ abstract class Entity
     public function version(): int
     {
         return $this->version;
-    }
-
-    public function setVersion(int $version): void
-    {
-        $this->version = $version;
     }
 
     public function hydrate(
@@ -215,7 +209,6 @@ abstract class Entity
 
     public function dirty(): Collection
     {
-
         return $this->dirty;
     }
 

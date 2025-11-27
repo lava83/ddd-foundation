@@ -15,6 +15,11 @@ class MongoObjectId implements JsonSerializable
         $this->validate($value);
     }
 
+    public function __toString()
+    {
+        return $this->toString();
+    }
+
     public static function fromString(string $value): static
     {
         return new static($value);
@@ -30,17 +35,17 @@ class MongoObjectId implements JsonSerializable
         return $this->value;
     }
 
-    public function __toString()
-    {
-        return $this->toString();
-    }
-
     /**
      * @return array{value: string}
      */
     public function jsonSerialize(): string
     {
         return $this->value;
+    }
+
+    public function equals(mixed $other): bool
+    {
+        return $other instanceof self && $this->value === $other->value;
     }
 
     private function validate(string $value): void
@@ -51,10 +56,5 @@ class MongoObjectId implements JsonSerializable
                 "Invalid ObjectId format. Expected 24 hexadecimal characters, got: {$value}"
             );
         }
-    }
-
-    public function equals(mixed $other): bool
-    {
-        return $other instanceof self && $this->value === $other->value;
     }
 }

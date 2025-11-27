@@ -20,6 +20,11 @@ class Color implements JsonSerializable
         $this->value = $color;
     }
 
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
     public static function fromString(string $color): static
     {
         return new static($color);
@@ -33,11 +38,6 @@ class Color implements JsonSerializable
     public function toString(): string
     {
         return (string) $this->value;
-    }
-
-    public function __toString(): string
-    {
-        return $this->toString();
     }
 
     private function validate(Stringable $color): void

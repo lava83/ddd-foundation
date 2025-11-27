@@ -20,36 +20,9 @@ abstract class Aggregate extends Entity implements AggregateRoot
      * @param  Collection<int, DomainEvent>  $domainEvents
      */
     public function __construct(
-        private Collection $domainEvents = new Collection,
+        private Collection $domainEvents = new Collection(),
     ) {
         parent::__construct();
-    }
-
-    /**
-     * Domain Events Management
-     */
-    public function recordEvent(DomainEvent $event): void
-    {
-        $this->domainEvents->push($event);
-    }
-
-    /**
-     * @return Collection<int, DomainEvent>
-     */
-    public function uncommittedEvents(): Collection
-    {
-        // Return a copy of the events to prevent external modification
-        return $this->domainEvents->map(fn (DomainEvent $event) => clone $event);
-    }
-
-    public function markEventsAsCommitted(): void
-    {
-        $this->domainEvents = collect();
-    }
-
-    public function hasUncommittedEvents(): bool
-    {
-        return ! $this->domainEvents->isEmpty();
     }
 
     /**
@@ -83,6 +56,33 @@ abstract class Aggregate extends Entity implements AggregateRoot
     }
 
     /**
+     * Domain Events Management
+     */
+    public function recordEvent(DomainEvent $event): void
+    {
+        $this->domainEvents->push($event);
+    }
+
+    /**
+     * @return Collection<int, DomainEvent>
+     */
+    public function uncommittedEvents(): Collection
+    {
+        // Return a copy of the events to prevent external modification
+        return $this->domainEvents->map(fn (DomainEvent $event) => clone $event);
+    }
+
+    public function markEventsAsCommitted(): void
+    {
+        $this->domainEvents = collect();
+    }
+
+    public function hasUncommittedEvents(): bool
+    {
+        return ! $this->domainEvents->isEmpty();
+    }
+
+    /**
      * Enhanced metadata for aggregate roots
      */
     public function metadata(): array
@@ -96,35 +96,6 @@ abstract class Aggregate extends Entity implements AggregateRoot
             'updated_at' => $this->updatedAt()->format(DateTimeImmutable::ATOM),
             'class' => static::class,
         ]);
-    }
-
-    /**
-     * Helper method for aggregate roots to update and record change event
-     *
-     * @param  array<string, mixed>  $changes  Key-value pairs of changes made to the aggregate
-     */
-    protected function updateAggregateRoot(
-        array $changes,
-        ?string $eventClass = null,
-        ?DomainEvent $event = null
-    ): void {
-        $changesCollection = $this->updateEntity($changes);
-
-        if ($changesCollection->isEmpty()) {
-            return;
-        }
-
-        if ($eventClass !== null) {
-            if (! is_a($eventClass, DomainEvent::class, true)) {
-                throw new LogicException("Event class {$eventClass} must implement DomainEvent interface");
-            }
-
-            $event = new $eventClass($this->id(), $changesCollection);
-        }
-
-        if ($event) {
-            $this->recordEvent($event);
-        }
     }
 
     /**
@@ -162,6 +133,35 @@ abstract class Aggregate extends Entity implements AggregateRoot
     public function countEventsOfType(string $eventName): int
     {
         return $this->domainEvents->filter(fn (DomainEvent $event) => $event->eventName() === $eventName)->count();
+    }
+
+    /**
+     * Helper method for aggregate roots to update and record change event
+     *
+     * @param  array<string, mixed>  $changes  Key-value pairs of changes made to the aggregate
+     */
+    protected function updateAggregateRoot(
+        array $changes,
+        ?string $eventClass = null,
+        ?DomainEvent $event = null
+    ): void {
+        $changesCollection = $this->updateEntity($changes);
+
+        if ($changesCollection->isEmpty()) {
+            return;
+        }
+
+        if ($eventClass !== null) {
+            if (! is_a($eventClass, DomainEvent::class, true)) {
+                throw new LogicException("Event class {$eventClass} must implement DomainEvent interface");
+            }
+
+            $event = new $eventClass($this->id(), $changesCollection);
+        }
+
+        if ($event) {
+            $this->recordEvent($event);
+        }
     }
 
     protected function updateDirtyEntity(): void

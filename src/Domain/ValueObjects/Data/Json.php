@@ -20,6 +20,11 @@ class Json implements JsonSerializable
         $this->data = fluent(json_decode($value, true));
     }
 
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+
     public static function fromString(string $json): self
     {
         $trimmed = trim($json);
@@ -126,11 +131,6 @@ class Json implements JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->data->toArray();
-    }
-
-    public function __toString(): string
-    {
-        return $this->value;
     }
 
     private function removeNestedValue(array &$array, string $key): void

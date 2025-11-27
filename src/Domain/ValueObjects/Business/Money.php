@@ -27,6 +27,11 @@ class Money implements JsonSerializable
         $this->currency = $currency;
     }
 
+    public function __toString(): string
+    {
+        return sprintf('%d %s', $this->amount, $this->currencySymbol());
+    }
+
     public static function euros(int $amount): static
     {
         return new static($amount / 100, 'EUR');
@@ -80,11 +85,6 @@ class Money implements JsonSerializable
             'currency' => $this->currency,
             'symbol' => $this->currencySymbol(),
         ];
-    }
-
-    public function __toString(): string
-    {
-        return sprintf('%d %s', $this->amount, $this->currencySymbol());
     }
 
     public function isEqual(Money $other): bool

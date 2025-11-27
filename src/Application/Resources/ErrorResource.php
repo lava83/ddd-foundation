@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Lava83\DddFoundation\Application\Resources;
 
 use Exception;
@@ -11,6 +13,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ErrorResource extends JsonResource
 {
+    /**
+     * @param Request $request
+     * @return array{error:string,code:int}
+     */
     public function toArray(Request $request): array
     {
         return [

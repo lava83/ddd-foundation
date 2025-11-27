@@ -26,6 +26,11 @@ class Link implements JsonSerializable
         $this->extractParts($link);
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->value;
+    }
+
     public static function fromString(string $link): static
     {
         return new static($link);
@@ -54,11 +59,6 @@ class Link implements JsonSerializable
     public function query(): Stringable
     {
         return $this->query;
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->value;
     }
 
     public function jsonSerialize(): string

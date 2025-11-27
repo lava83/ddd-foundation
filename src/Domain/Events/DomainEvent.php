@@ -23,14 +23,14 @@ abstract class DomainEvent implements DomainEventContract
     public function __construct(
         /** @todo here we expect only an Id not the types of it */
         private Uuid|MongoObjectId $aggregateId,
-        private Collection $eventData = new Collection,
+        private Collection $eventData = new Collection(),
         int $eventVersion = 1
     ) {
         $this->eventVersion = $eventVersion;
         $this->occurredOn = CarbonImmutable::now();
     }
 
-    public function aggregateId(): Uuid
+    public function aggregateId(): MongoObjectId|Uuid
     {
         return $this->aggregateId;
     }

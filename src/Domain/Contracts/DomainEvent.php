@@ -6,6 +6,7 @@ namespace Lava83\DddFoundation\Domain\Contracts;
 
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
+use Lava83\DddFoundation\Domain\ValueObjects\Identity\MongoObjectId;
 use Lava83\DddFoundation\Domain\ValueObjects\Identity\Uuid;
 
 interface DomainEvent
@@ -13,7 +14,7 @@ interface DomainEvent
     /**
      * Get the aggregate ID that triggered this event
      */
-    public function aggregateId(): Uuid;
+    public function aggregateId(): Uuid|MongoObjectId;
 
     /**
      * Get the event name/type

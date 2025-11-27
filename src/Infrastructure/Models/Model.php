@@ -10,6 +10,7 @@ use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
 
 /**
  * @property int $version
+ *
  * @property-read Carbon $created_at
  * @property-read ?Carbon $updated_at
  *
@@ -17,7 +18,7 @@ use Lava83\DddFoundation\Infrastructure\Models\Concerns\HasUuids;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Model newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Model query()
  */
-class Model extends EloquentModel
+abstract class Model extends EloquentModel
 {
     use HasUuids;
 

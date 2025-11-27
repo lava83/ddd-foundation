@@ -14,9 +14,8 @@ use Ramsey\Uuid\UuidInterface;
 
 class Uuid implements JsonSerializable
 {
-    private UuidInterface $value;
-
     protected string $prefix = '';
+    private UuidInterface $value;
 
     final public function __construct(string $value)
     {
@@ -26,6 +25,11 @@ class Uuid implements JsonSerializable
 
         $this->validate($value);
         $this->value = RamseyUuid::fromString($value);
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
     }
 
     public static function generate(): static
@@ -98,6 +102,7 @@ class Uuid implements JsonSerializable
 
     /**
      * @param  array<string>  $values
+     *
      * @return array<static>
      */
     public static function fromArray(array $values): array
@@ -107,6 +112,7 @@ class Uuid implements JsonSerializable
 
     /**
      * @param  array<Uuid>  $ids
+     *
      * @return array<string>
      */
     public static function toStringArray(array $ids): array
@@ -142,11 +148,6 @@ class Uuid implements JsonSerializable
     public function toString(): string
     {
         return $this->value();
-    }
-
-    public function __toString(): string
-    {
-        return $this->toString();
     }
 
     public function jsonSerialize(): string
@@ -266,9 +267,12 @@ class Uuid implements JsonSerializable
             ->toString();
     }
 
+    /**
+     * @throws ValidationException
+     */
     private function validate(string $value): void
     {
-        if (empty(trim($value))) {
+        if (filled(trim($value))) {
             throw new ValidationException('Id cannot be empty');
         }
 

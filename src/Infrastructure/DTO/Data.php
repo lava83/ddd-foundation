@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Lava83\DddFoundation\Infrastructure\DTO;
 
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data as SpatieData;
 
 abstract class Data extends SpatieData
 {
     /**
-     * @return array<string, mixed>
+     * @return array<string, Data|Collection<int, Data>|array|string|float|integer|bool|null>
      */
     abstract public function mapToPersistenceLayerArray(): array;
 }

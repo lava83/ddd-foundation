@@ -7,7 +7,7 @@ namespace Lava83\DddFoundation\Infrastructure\Exceptions;
 use RuntimeException;
 use Throwable;
 
-class ConcurrencyException extends RuntimeException
+final class ConcurrencyException extends RuntimeException
 {
     public function __construct(
         string $message = 'Concurrency conflict detected',

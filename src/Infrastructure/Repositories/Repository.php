@@ -15,6 +15,7 @@ use Lava83\DddFoundation\Infrastructure\Exceptions\CantDeleteRelatedModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\CantSaveModel;
 use Lava83\DddFoundation\Infrastructure\Exceptions\ConcurrencyException;
 use Lava83\DddFoundation\Infrastructure\Services\DomainEventPublisher;
+use Lava83\DddFoundation\Infrastructure\Models\Model as Lava83Model;
 
 abstract class Repository
 {
@@ -35,6 +36,7 @@ abstract class Repository
 
     protected function saveEntity(Entity|Aggregate $entity): Model
     {
+        /** @var Lava83Model $model  */
         $model = $this->mapperResolver->resolve($entity::class)->toModel($entity);
 
         if (
@@ -62,6 +64,9 @@ abstract class Repository
         }
     }
 
+    /**
+     * @param Collection<Entity> $entities
+     */
     protected function deleteEntities(Collection $entities): void
     {
         $entities->each(fn (Entity $entity) => $this->deleteEntity($entity));
@@ -94,15 +99,16 @@ abstract class Repository
         }
     }
 
+    /**
+     * @param Lava83Model $model
+     */
     protected function handleOptimisticLocking(Model $model, Entity $entity): void
     {
         $expectedDatabaseVersion = $entity->version();
 
         if ($model->version !== $expectedDatabaseVersion) {
             throw new ConcurrencyException(
-                "Entity {$entity->id()->value()} was modified by another process. ".
-                "Expected version: {$expectedDatabaseVersion}, ".
-                "Actual version: {$model->version}"
+                "Entity {$entity->id()->value()} was modified by another process. Expected version: $expectedDatabaseVersion, Actual version: $model->version",
             );
         }
     }
@@ -113,6 +119,9 @@ abstract class Repository
         $entity->hydrate($model);
     }
 
+    /**
+     * @param Lava83Model $model
+     */
     private function persistDirtyEntity(Entity|Aggregate $entity, Model $model): void
     {
         if ($model->exists) {

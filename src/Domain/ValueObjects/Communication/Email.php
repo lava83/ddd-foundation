@@ -27,6 +27,11 @@ class Email implements JsonSerializable
         $this->parseEmailParts();
     }
 
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
     public static function fromString(string $email): static
     {
         return new static($email);
@@ -35,68 +40,6 @@ class Email implements JsonSerializable
     public static function fromParts(string $localPart, string $domain): static
     {
         return new static($localPart.'@'.$domain);
-    }
-
-    private function validate(Stringable $email): void
-    {
-        $email = $email->trim();
-
-        $validator = Validator::make(
-            ['email' => $email],
-            [
-                'email' => [
-                    'required',
-                    'email:rfc',
-                    fn (string $attribute, string $value, Closure $fail) => $this->validateBusinessRules(str($value), $fail),
-                ],
-            ]
-        );
-
-        if ($validator->fails()) {
-            throw new ValidationException('Invalid email format provided');
-        }
-    }
-
-    private function validateBusinessRules(Stringable $email, Closure $fail): void
-    {
-        $localPart = $email->before('@');
-        $domain = $email->after('@');
-
-        // Block obviously fake/temporary email services (extend as needed)
-        $blockedDomains = [
-            '10minutemail.com',
-            'tempmail.org',
-            'guerrillamail.com',
-            'mailinator.com',
-            'temp-mail.org',
-            'throwaway.email',
-        ];
-
-        if (in_array($domain, $blockedDomains)) {
-            $fail('Temporary email addresses are not allowed');
-            // throw new ValidationException('Temporary email addresses are not allowed');
-        }
-
-        // Block emails with suspicious patterns
-        $suspiciousPatterns = [
-            '/test.*test/i',
-            '/fake.*fake/i',
-            '/spam.*spam/i',
-            '/noreply/i',
-            '/no-reply/i',
-        ];
-
-        foreach ($suspiciousPatterns as $pattern) {
-            if (preg_match($pattern, (string) $localPart)) {
-                $fail('Email address appears to be invalid or test address');
-            }
-        }
-    }
-
-    private function parseEmailParts(): void
-    {
-        $this->localPart = $this->value->before('@');
-        $this->domain = $this->value->after('@');
     }
 
     public function value(): Stringable
@@ -246,11 +189,6 @@ class Email implements JsonSerializable
         return (string) $this->value;
     }
 
-    public function __toString(): string
-    {
-        return $this->toString();
-    }
-
     public function toString(): string
     {
         return (string) $this->value;
@@ -263,15 +201,15 @@ class Email implements JsonSerializable
     {
         $params = [];
 
-        if (! empty($subject)) {
+        if (filled($subject)) {
             $params[] = 'subject='.urlencode($subject);
         }
 
-        if (! empty($body)) {
+        if (filled($body)) {
             $params[] = 'body='.urlencode($body);
         }
 
-        $queryString = ! empty($params) ? '?'.implode('&', $params) : '';
+        $queryString = filled($params) ? '?'.implode('&', $params) : '';
 
         return 'mailto:'.$this->value.$queryString;
     }
@@ -299,7 +237,7 @@ class Email implements JsonSerializable
     /**
      * Check if email is likely a role-based email
      */
-    public function isRoleBasedEmail(): bool
+    public function isRoleBased(): bool
     {
         $roleBasedPrefixes = [
             'admin',
@@ -343,7 +281,7 @@ class Email implements JsonSerializable
         }
 
         // Deduct points for role-based emails
-        if ($this->isRoleBasedEmail()) {
+        if ($this->isRoleBased()) {
             $score -= 30;
         }
 
@@ -358,5 +296,67 @@ class Email implements JsonSerializable
         }
 
         return max(0, min(100, $score));
+    }
+
+    private function validate(Stringable $email): void
+    {
+        $email = $email->trim();
+
+        $validator = Validator::make(
+            ['email' => $email],
+            [
+                'email' => [
+                    'required',
+                    'email:rfc',
+                    fn (string $attribute, string $value, Closure $fail) => $this->validateBusiness(str($value), $fail),
+                ],
+            ]
+        );
+
+        if ($validator->fails()) {
+            throw new ValidationException('Invalid email format provided');
+        }
+    }
+
+    private function validateBusiness(Stringable $email, Closure $fail): void
+    {
+        $localPart = $email->before('@');
+        $domain = $email->after('@');
+
+        // Block obviously fake/temporary email services (extend as needed)
+        $blockedDomains = [
+            '10minutemail.com',
+            'tempmail.org',
+            'guerrillamail.com',
+            'mailinator.com',
+            'temp-mail.org',
+            'throwaway.email',
+        ];
+
+        if (in_array($domain, $blockedDomains)) {
+            $fail('Temporary email addresses are not allowed');
+            // throw new ValidationException('Temporary email addresses are not allowed');
+        }
+
+        // Block emails with suspicious patterns
+        $suspiciousPatterns = [
+            '/test.*test/i',
+            '/fake.*fake/i',
+            '/spam.*spam/i',
+            '/noreply/i',
+            '/no-reply/i',
+        ];
+
+        foreach ($suspiciousPatterns as $pattern) {
+            if (preg_match($pattern, (string) $localPart)) {
+                $fail('Email address appears to be invalid or test address');
+            }
+        }
+    }
+
+    private function parseEmailParts(): void
+    {
+        $this->localPart = $this->value->before('@');
+        $this->domain = $this->value->after('@');
     }
 }

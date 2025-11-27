@@ -28,32 +28,6 @@ enum CountryAreaCode: string
     case LI = '+423';
     case PT = '+351';
 
-    public static function fromName(string $name): self
-    {
-        return match ($name) {
-            'US' => self::US,
-            'DE' => self::DE,
-            'FR' => self::FR,
-            'IT' => self::IT,
-            'ES' => self::ES,
-            'UK' => self::UK,
-            'AU' => self::AU,
-            'PL' => self::PL,
-            'BE' => self::BE,
-            'NL' => self::NL,
-            'CH' => self::CH,
-            'LU' => self::LU,
-            'AT' => self::AT,
-            'DK' => self::DK,
-            'NO' => self::NO,
-            'FI' => self::FI,
-            'SE' => self::SE,
-            'LI' => self::LI,
-            'PT' => self::PT,
-            default => throw new InvalidArgumentException("Invalid country area code: {$name}"),
-        };
-    }
-
     /**
      * @return array<string>
      */
