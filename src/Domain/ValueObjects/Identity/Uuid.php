@@ -19,6 +19,9 @@ class Uuid implements JsonSerializable, Stringable
 
     private readonly UuidInterface $value;
 
+    /**
+     * @throws ValidationException
+     */
     final public function __construct(string $value)
     {
         if (blank($this->prefix)) {
@@ -274,7 +277,7 @@ class Uuid implements JsonSerializable, Stringable
      */
     private function validate(string $value): void
     {
-        if (filled(trim($value))) {
+        if (blank($value)) {
             throw new ValidationException('Id cannot be empty');
         }
 
